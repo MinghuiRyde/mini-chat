@@ -4,10 +4,15 @@ const jwt = require('jsonwebtoken');
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
 
 exports.login = async (req, res) => {
-  const { jsCode } = req.body;
+  const { jsCode, nickname, avatarUrl } = req.body;
 
   if (!jsCode) {
     return res.status(400).json({ error: 'Missing jsCode in request body' });
+  }
+
+  if (!nickname || !avatarUrl) {
+    console.warn('nickname or avatarUrl not provided by client, defaulting to empty');
+    return res.status(400).json({ error: 'Missing nickname or avatarUrl' });
   }
 
   try {
@@ -24,8 +29,8 @@ exports.login = async (req, res) => {
       user = new User({
         _id: payload.openid,
         sessionToken: token,
-        nickname: nickname || '',
-        avatarUrl: avatarUrl || ''
+        nickname: nickname,
+        avatarUrl: avatarUrl
       });
 
       await user.save();
