@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
@@ -27,14 +27,13 @@ exports.login = async (req, res) => {
         nickname: nickname || '',
         avatarUrl: avatarUrl || ''
       });
-    }
 
-    await user.save();
+      await user.save();
+    }
 
     res.status(200).json({ token, expiresDate });
 
   } catch (err) {
-    console.log('Login failed with error: ', err.message);
     res.status(500).json({ error: err.message });
   }
 };
