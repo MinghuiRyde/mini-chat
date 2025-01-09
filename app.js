@@ -16,4 +16,4 @@ app.use('/api/auth', authRoutes);
 
 // start server
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Listening on ${PORT}`));
