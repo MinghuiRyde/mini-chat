@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
     let user = await User.findById(payload.openid);
     if (!user) {
       user = new User({
-        _id: payload.openid,
+        _id: payload.openId,
         sessionToken: token,
         nickname: nickname,
         avatarUrl: avatarUrl

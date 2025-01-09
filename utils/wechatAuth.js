@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const getSessionKeyAndOpenId = async (jsCode) => {
-  const appId = process.env.WECHAT_APP_ID;
+  const appId = process.env.WECHAT_APPID;
   const appSecret = process.env.WECHAT_APP_SECRET;
   const url =
     `https://api.weixin.qq.com/sns/jscode2session?
@@ -17,8 +17,8 @@ const getSessionKeyAndOpenId = async (jsCode) => {
   }
 
   return {
-    openid: response.data.openid,
-    sessionKey: response.data.session_Key,
+    openId: response.data.openid,
+    sessionKey: response.data.session_key,
   };
 
 };
