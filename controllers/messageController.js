@@ -7,18 +7,20 @@ exports.getMessagesByChatId = async (req, res) => {
     //sort in ascending timestamp order
     const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
 
-    const messageList = messages.map(msg => ({
+    const messageList = messages ? messages.map(msg => ({
       message_id: msg.id,
       sender_id: msg.senderId,
       content: msg.message,
       timestamp: msg.timestamp,
       status: msg.status
-    }));
+    })) : [];
 
-    return res.json({
+    const resData = {
       chat_id: chatId,
       messages: messageList
-    });
+    };
+
+    return res.json(resData);
   } catch (error) {
     console.log('Error retrieving messages', error);
     return res.status(500).json({error: 'Server Error with retrieving messages'});
