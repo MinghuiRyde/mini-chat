@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
+const chatsRoutes = require('./routes/chats');
+
 const http = require('http');
 const { Server } = require('socket.io');
 const Message = require('./models/Message');
@@ -30,6 +33,7 @@ mongoose.connect(process.env.MONGODB_URI)
 //routes
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/chats', chatsRoutes);
 
 //sockets
 io.on('connection', (socket) => {

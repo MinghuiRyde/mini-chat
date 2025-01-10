@@ -12,7 +12,7 @@ const getSessionKeyAndOpenId = async (auth_code) => {
     throw new Error(`WeChat API Error: ${response.data.errmsg}`);
   }
 
-  console.log(response.data);
+  //console.log(response.data);
 
   return {
     openId: response.data.openid,
