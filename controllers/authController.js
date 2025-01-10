@@ -15,9 +15,10 @@ exports.login = async (req, res) => {
     return res.status(400).json({ error: 'Missing nickname or avatarUrl' });
   }
 
-  const payload = await getSessionKeyAndOpenId(auth_code);
   try {
+    const payload = await getSessionKeyAndOpenId(auth_code);
     let user = await User.findById(payload.openid);
+
     if (!user) {
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
       const expire_date = new Date(Date.now() + expiresIn);
@@ -31,14 +32,13 @@ exports.login = async (req, res) => {
         nickname: nickname,
         avatarUrl: avatar_url
       });
-
       await user.save();
+
       res.status(200).json({ session_token: session_token, expire_date: expire_date });
     } else {
       const decoded = jwt.decode(user.sessionToken);
       res.status(200).json({ session_token: user.sessionToken, expire_date: decoded.exp });
     }
-
 
   } catch (err) {
     res.status(500).json({ error: err.message });
