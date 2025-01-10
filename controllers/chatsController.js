@@ -1,23 +1,43 @@
 const Chat = require('../models/Chat');
+const User = require('../models/User');
 
 exports.getChatsByUser = async (req, res) => {
   try {
     const userId = req.params.user_id;
     const chats = await Chat.find({participants: userId});
 
-    const chatList = chats ? chats.map(chat => ({
-        chat_id: chat._id,
-        last_message: chat.lastMessage,
-        last_message_time: chat.lastMessageTimestamp,
-        unread_count: chat.unreadCount,
-      })) : [];
+    if (!chats || chats.length === 0) {
+      res.status(200).json({ chats: [] });
+    } else {
+      const recipientIds = chats.map(chat => chat.participants.find(
+        participant => participant !== userId
+      ));
 
-    const resData = {
-      user_id: userId,
-      chats: chatList,
-    };
-    
-    res.status(200).json(resData);
+      const recipients = await User.find({ _id: { $in: recipientIds } });
+
+      const recipientMap = recipients.reduce((map, recipient) => {
+        map[recipient._id] = recipient;
+        return map;
+      }, {});
+
+      const chatList = chats.map(chat => {
+        const recipientId = chat.participants.find(participant => participant !== userId);
+        const recipient = recipientMap[recipientId];
+
+        return {
+          chat_id: chat._id,
+          recipient_nickname: recipient ? recipient.nickname : null,
+          recipient_avatar_url: recipient ? recipient.avatarUrl : null,
+          last_message: chat.lastMessage,
+          last_message_time: chat.lastMessageTimestamp,
+          unread_count: chat.unreadCount,
+        };
+      });
+
+      const resData = { chats: chatList };
+
+      res.status(200).json(resData);
+    }
   } catch (error) {
     return res.status(500).json({error: error.message});
   }

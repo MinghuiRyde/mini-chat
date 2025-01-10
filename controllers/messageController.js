@@ -15,10 +15,7 @@ exports.getMessagesByChatId = async (req, res) => {
       status: msg.status
     })) : [];
 
-    const resData = {
-      chat_id: chatId,
-      messages: messageList
-    };
+    const resData = { messages: messageList };
 
     return res.json(resData);
   } catch (error) {
