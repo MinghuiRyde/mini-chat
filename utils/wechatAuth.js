@@ -8,7 +8,7 @@ const getSessionKeyAndOpenId = async (auth_code) => {
   
   const response = await axios.get(url);
 
-  if (response.data.errorcode) {
+  if (response.data.errorcode !== 53015) {
     throw new Error(`WeChat API Error: ${response.data.errmsg}`);
   }
 

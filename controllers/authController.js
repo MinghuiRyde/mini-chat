@@ -15,10 +15,10 @@ exports.login = async (req, res) => {
     return res.status(400).json({ error: 'Missing nickname or avatarUrl' });
   }
 
+  const payload = await getSessionKeyAndOpenId(auth_code);
   try {
     let user = await User.findById(payload.openid);
     if (!user) {
-      const payload = await getSessionKeyAndOpenId(auth_code);
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
       const expire_date = new Date(Date.now() + expiresIn);
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
