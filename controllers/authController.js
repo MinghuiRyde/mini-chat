@@ -4,22 +4,22 @@ const jwt = require('jsonwebtoken');
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
 
 exports.login = async (req, res) => {
-  const { jsCode, nickname, avatarUrl } = req.body;
+  const { auth_code, nickname, avatar_url } = req.body;
 
-  if (!jsCode) {
+  if (!auth_code) {
     return res.status(400).json({ error: 'Missing jsCode in request body' });
   }
 
-  if (!nickname || !avatarUrl) {
+  if (!nickname || !avatar_url) {
     console.warn('nickname or avatarUrl not provided by client, defaulting to empty');
     return res.status(400).json({ error: 'Missing nickname or avatarUrl' });
   }
 
   try {
-    const payload = await getSessionKeyAndOpenId(jsCode);
+    const payload = await getSessionKeyAndOpenId(auth_code);
     const expiresIn = 7 * 24 * 60 * 60 * 1000;
-    const expiresDate = new Date(Date.now() + expiresIn);
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    const expire_date = new Date(Date.now() + expiresIn);
+    const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.SESSION_EXPIRES,
     });
 
@@ -28,15 +28,15 @@ exports.login = async (req, res) => {
     if (!user) {
       user = new User({
         _id: payload.openId,
-        sessionToken: token,
+        sessionToken: session_token,
         nickname: nickname,
-        avatarUrl: avatarUrl
+        avatarUrl: avatar_url
       });
 
       await user.save();
     }
 
-    res.status(200).json({ token, expiresDate });
+    res.status(200).json({ session_token: session_token, expire_date: expire_date });
 
   } catch (err) {
     res.status(500).json({ error: err.message });

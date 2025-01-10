@@ -9,4 +9,6 @@ const MessageSchema = mongoose.Schema({
   timestamp: Date,
 });
 
+MessageSchema.index({ chatId: 1, timestamp: -1 });
+
 module.exports = mongoose.model('Message', MessageSchema);

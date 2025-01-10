@@ -1,9 +1,10 @@
 const Message = require('../models/Message');
 
-exports.getMessagesBy = async (req, res) => {
+exports.getMessagesByChatId = async (req, res) => {
   try {
     const { chatId } = req.params;
 
+    //sort in ascending timestamp order
     const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
 
     const messageList = messages.map(msg => ({
@@ -19,7 +20,7 @@ exports.getMessagesBy = async (req, res) => {
       messages: messageList
     });
   } catch (error) {
-    console.log(error);
+    console.log('Error retrieving messages', error);
     return res.status(500).json({error: 'Server Error with retrieving messages'});
   }
 }
