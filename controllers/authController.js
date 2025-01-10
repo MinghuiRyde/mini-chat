@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
       const expire_date = new Date(Date.now() + expiresIn);
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: expire_date,
+        expiresIn: process.env.SECRET_EXPIRES,
       });
 
       user = new User({
@@ -38,7 +38,8 @@ exports.login = async (req, res) => {
       res.status(200).json({ session_token: session_token, expire_date: expire_date });
     } else {
       const decoded = jwt.decode(user.sessionToken);
-      res.status(200).json({ session_token: user.sessionToken, expire_date: decoded.exp });
+      const expire_date = new Date(decoded.exp * 1000);
+      res.status(200).json({ session_token: user.sessionToken, expire_date: expire_date });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
