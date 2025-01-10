@@ -16,16 +16,15 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const payload = await getSessionKeyAndOpenId(auth_code);
-    const expiresIn = 7 * 24 * 60 * 60 * 1000;
-    const expire_date = new Date(Date.now() + expiresIn);
-    const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: process.env.SESSION_EXPIRES,
-    });
-
-
     let user = await User.findById(payload.openid);
     if (!user) {
+      const payload = await getSessionKeyAndOpenId(auth_code);
+      const expiresIn = 7 * 24 * 60 * 60 * 1000;
+      const expire_date = new Date(Date.now() + expiresIn);
+      const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: expire_date,
+      });
+
       user = new User({
         _id: payload.openId,
         sessionToken: session_token,
@@ -34,9 +33,12 @@ exports.login = async (req, res) => {
       });
 
       await user.save();
+      res.status(200).json({ session_token: session_token, expire_date: expire_date });
+    } else {
+      const decoded = jwt.decode(user.sessionToken);
+      res.status(200).json({ session_token: user.sessionToken, expire_date: decoded.exp });
     }
 
-    res.status(200).json({ session_token: session_token, expire_date: expire_date });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
