@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
       const expire_date = new Date(Date.now() + expiresIn);
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.SECRET_EXPIRES,
+        expiresIn: process.env.SESSION_EXPIRES,
       });
 
       user = new User({
