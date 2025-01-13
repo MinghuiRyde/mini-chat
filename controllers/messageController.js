@@ -27,8 +27,8 @@ exports.getMessagesByChatId = async (req, res) => {
 
     const messageList = messages.map(msg => ({
       sender_id: msg.senderId,
-      recipient_nickname: recipient ? recipient.nickname : '',
-      recipient_avatar_url: recipient ? recipient.avatarUrl : '',
+      recipients_nickname: recipient ? recipient.nickname : '',
+      recipients_avatar_url: recipient ? recipient.avatarUrl : '',
       content: msg.message,
       timestamp: msg.timestamp,
       status: msg.status
