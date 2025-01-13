@@ -38,9 +38,9 @@ exports.login = async (req, res) => {
       const dummyChat = new Chat({
         _id: `${auth_code}chat0`,
         lastMessage: `Welcome ${nickname}!`,
-        lastMessageTimeStamp: new Date(),
+        lastMessageTimestamp: new Date(),
         participants: [auth_code, auth_code],
-        unreadCount: 0,
+        unreadCount: 1,
       })
 
       const dummyMsg = new Message({

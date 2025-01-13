@@ -5,6 +5,7 @@ exports.getChatsByUser = async (req, res) => {
   try {
     const { user_id } = req.params;
     const chats = await Chat.find({participants: user_id});
+    const user = await User.findById(user_id);
 
     if (!chats) {
       res.status(200).json({ chats: [] });
@@ -23,11 +24,12 @@ exports.getChatsByUser = async (req, res) => {
       const chatList = chats.map(chat => {
         const recipientId = chat.participants.find(participant => participant !== user_id);
         const recipient = recipientMap[recipientId];
-
+        console.log(chat);
+        console.log(chat.lastMessageTimestamp);
         return {
           chat_id: chat._id,
-          recipient_nickname: recipient ? recipient.nickname : '',
-          recipient_avatar_url: recipient ? recipient.avatarUrl : '',
+          recipient_nickname: recipient ? recipient.nickname : user.nickname,
+          recipient_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
           last_message: chat.lastMessage,
           last_message_time: chat.lastMessageTimestamp,
           unread_count: chat.unreadCount,
