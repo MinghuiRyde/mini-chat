@@ -2,7 +2,7 @@ const jw = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authenHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401)
       .json({ error: 'No or invalid authentication token provided' });
   }
