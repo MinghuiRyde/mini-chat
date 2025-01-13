@@ -6,7 +6,7 @@ exports.getChatsByUser = async (req, res) => {
     const { userId } = req.params;
     const chats = await Chat.find({participants: userId});
 
-    if (!chats || chats.length === 0) {
+    if (!chats) {
       res.status(200).json({ chats: [] });
     } else {
       const recipientIds = chats.map(chat => chat.participants.find(
