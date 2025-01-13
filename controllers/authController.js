@@ -39,7 +39,11 @@ exports.login = async (req, res) => {
     } else {
       const decoded = jwt.decode(user.sessionToken);
       const expire_date = new Date(decoded.exp * 1000);
-      res.status(200).json({ session_token: user.sessionToken, expire_date: expire_date });
+      res.status(200).json({
+        session_token: user.sessionToken,
+        expire_date: expire_date,
+        user_id: auth_code,
+      });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
