@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
 const chatsRoutes = require('./routes/chats');
+const recipientsRoutes = require('./routes/recipients');
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -34,6 +35,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/chats', chatsRoutes);
+app.use('/api/recipients', recipientsRoutes);
 
 //sockets
 io.on('connection', (socket) => {
