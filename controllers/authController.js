@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
         _id: auth_code,
         sessionToken: session_token,
         nickname: nickname,
-        avatarUrl: avatar_url == 'url' ? defaultUrl : avatar_url,
+        avatarUrl: avatar_url === 'url' ? defaultUrl : avatar_url,
       });
 
       const dummyChat = new Chat({
