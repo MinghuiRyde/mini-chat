@@ -1,4 +1,6 @@
 const Message = require('../models/Message');
+const Chat = require('../models/Chat');
+const User = require('../models/User');
 
 exports.getMessagesByChatId = async (req, res) => {
   try {
@@ -7,19 +9,32 @@ exports.getMessagesByChatId = async (req, res) => {
     //sort in ascending timestamp order
     const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
 
-    const messageList = messages ? messages.map(msg => ({
-      message_id: msg.id,
+    if (!messages || messages.length === 0) {
+      return res.status(200).json({ messages: [] });
+    }
+
+    const userId = messages[0].senderId;
+    const chat = await Chat.findOne({ chatId });
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat Not Found' });
+    }
+
+    const recipientId = chat.participants.find(participant => participant !== userId);
+    const recipient = recipientId ? await User.findById(recipientId) : null;
+
+    const messageList = messages.map(msg => ({
       sender_id: msg.senderId,
+      recipient_nickname: recipient ? recipient.nickname : '',
+      recipient_avatar_url: recipient ? recipient.avatarUrl : '',
       content: msg.message,
       timestamp: msg.timestamp,
       status: msg.status
-    })) : [];
+    }));
 
-    const resData = { messages: messageList };
+    res.status(200).json({ messages: messageList });
 
-    return res.json(resData);
   } catch (error) {
     console.log('Error retrieving messages', error);
-    return res.status(500).json({error: 'Server Error with retrieving messages'});
+    res.status(500).json({error: 'Server Error with retrieving messages'});
   }
 }

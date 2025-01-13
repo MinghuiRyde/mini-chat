@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 exports.getChatsByUser = async (req, res) => {
   try {
-    const userId = req.params.user_id;
+    const { userId } = req.params;
     const chats = await Chat.find({participants: userId});
 
     if (!chats || chats.length === 0) {
@@ -26,8 +26,8 @@ exports.getChatsByUser = async (req, res) => {
 
         return {
           chat_id: chat._id,
-          recipient_nickname: recipient ? recipient.nickname : null,
-          recipient_avatar_url: recipient ? recipient.avatarUrl : null,
+          recipient_nickname: recipient ? recipient.nickname : '',
+          recipient_avatar_url: recipient ? recipient.avatarUrl : '',
           last_message: chat.lastMessage,
           last_message_time: chat.lastMessageTimestamp,
           unread_count: chat.unreadCount,
@@ -35,7 +35,6 @@ exports.getChatsByUser = async (req, res) => {
       });
 
       const resData = { chats: chatList };
-
       res.status(200).json(resData);
     }
   } catch (error) {
