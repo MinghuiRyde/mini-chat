@@ -3,14 +3,14 @@ const User = require('../models/User');
 
 exports.getChatsByUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const chats = await Chat.find({participants: userId});
+    const { user_id } = req.params;
+    const chats = await Chat.find({participants: user_id});
 
     if (!chats) {
       res.status(200).json({ chats: [] });
     } else {
       const recipientIds = chats.map(chat => chat.participants.find(
-        participant => participant !== userId
+        participant => participant !== user_id
       ));
 
       const recipients = await User.find({ _id: { $in: recipientIds } });
@@ -21,7 +21,7 @@ exports.getChatsByUser = async (req, res) => {
       }, {});
 
       const chatList = chats.map(chat => {
-        const recipientId = chat.participants.find(participant => participant !== userId);
+        const recipientId = chat.participants.find(participant => participant !== user_id);
         const recipient = recipientMap[recipientId];
 
         return {
