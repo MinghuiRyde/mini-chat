@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Chat = require('../models/Chat');
+const Message = require('../models/Message');
 const jwt = require('jsonwebtoken');
 
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
@@ -26,14 +28,33 @@ exports.login = async (req, res) => {
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.SESSION_EXPIRES,
       });
-
       user = new User({
         _id: auth_code,
         sessionToken: session_token,
         nickname: nickname,
         avatarUrl: avatar_url
       });
+
+      const dummyChat = new Chat({
+        _id: `${auth_code}chat0`,
+        lastMessage: `Welcome ${nickname}!`,
+        lastMessageTimeStamp: new Date(),
+        participants: [auth_code, auth_code],
+        unreadCount: 0,
+      })
+
+      const dummyMsg = new Message({
+        _id: `${auth_code}msg0`,
+        senderId: auth_code,
+        chatId: dummyChat._id,
+        message: `Welcome ${nickname}!`,
+        status: 'read',
+        timestamp: new Date(),
+      })
+
       await user.save();
+      await dummyChat.save();
+      await dummyMsg.save();
 
       res.status(200).json({
         session_token: user.sessionToken,
