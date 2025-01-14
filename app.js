@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://mini-chat-rig7.onrender.com/',
+    origin: 'wss://mini-chat-rig7.onrender.com/',
   }
 });
 
@@ -81,6 +81,7 @@ io.on('connection', (socket) => {
       status: 'sent',
       timestamp: currentTime,
     });
+
     try {
       await newMessage.save();
     } catch (error) {
