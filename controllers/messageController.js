@@ -10,7 +10,7 @@ exports.getMessagesByChatId = async (req, res) => {
     //sort in ascending timestamp order
     const messages = await Message.find({ chatId: chat_id }).sort({ timestamp: 1 });
 
-    if (!messages) {
+    if (!messages || !messages.length) {
       return res.status(200).json({ messages: [] });
     }
 

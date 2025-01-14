@@ -41,3 +41,31 @@ exports.getChatsByUser = async (req, res) => {
     return res.status(500).json({error: error.message});
   }
 };
+
+exports.createChat = async (req, res) => {
+  const { user_a, user_b } = req.params;
+
+  if (!user_a || !user_b) {
+    return res.status(400).json({error: 'One or more user id missing'});
+  }
+
+  try {
+    const chatId = [user_a, user_b].sort().join('_');
+    let chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      chat = new Chat({
+        _id: chatId,
+        lastMessage: '',
+        lastMessageTimestamp: new Date(),
+        participants: [user_a, user_b],
+        unreadCount: 0,
+      });
+      await chat.save();
+    }
+    res.status(200).json(chat);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({error: error.message});
+  }
+}

@@ -19,33 +19,33 @@ exports.login = async (req, res) => {
   }
 
   try {
-
-    let user = await User.findById(auth_code);
+    const payload = await getSessionKeyAndOpenId(auth_code);
+    const userId = payload.openId;
+    let user = await User.findById(userId);
 
     if (!user) {
-      const payload = await getSessionKeyAndOpenId(auth_code);
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
       const expire_date = new Date(Date.now() + expiresIn);
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.SESSION_EXPIRES,
       });
       user = new User({
-        _id: auth_code,
+        _id: userId,
         sessionToken: session_token,
         nickname: nickname,
         avatarUrl: avatar_url === 'url' ? defaultUrl : avatar_url,
       });
 
       const dummyChat = new Chat({
-        _id: `${auth_code}chat0`,
+        _id: `${userId}chat0`,
         lastMessage: `Welcome ${nickname}!`,
         lastMessageTimestamp: new Date(),
-        participants: [auth_code, auth_code],
+        participants: [userId, userId],
         unreadCount: 1,
       })
 
       const dummyMsg = new Message({
-        _id: `${auth_code}msg0`,
+        _id: `${userId}msg0`,
         senderId: auth_code,
         chatId: dummyChat._id,
         message: `Welcome ${nickname}!`,
@@ -60,7 +60,7 @@ exports.login = async (req, res) => {
       res.status(200).json({
         session_token: user.sessionToken,
         expire_date: expire_date,
-        user_id: auth_code,
+        user_id: userId,
       });
     } else {
       const decoded = jwt.decode(user.sessionToken);
