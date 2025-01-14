@@ -50,6 +50,12 @@ exports.createChat = async (req, res) => {
     return res.status(400).json({error: 'One or more user id missing'});
   }
 
+  const userA = User.findById(user_a);
+  const userB = User.findById(user_b);
+  if (!userA || !userB) {
+    return res.status(401).json({error: 'Some user dose not exist in the database'});
+  }
+
   try {
     const seed = [user_a, user_b].sort().join('_');
     const hash = crypto.createHash('sha256').update(seed).digest('base64');
