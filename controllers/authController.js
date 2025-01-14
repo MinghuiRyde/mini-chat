@@ -46,7 +46,7 @@ exports.login = async (req, res) => {
 
       const dummyMsg = new Message({
         _id: `${userId}msg0`,
-        senderId: auth_code,
+        senderId: userId,
         chatId: dummyChat._id,
         message: `Welcome ${nickname}!`,
         status: 'read',
