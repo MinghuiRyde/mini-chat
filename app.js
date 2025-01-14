@@ -50,14 +50,18 @@ io.on('connection', (socket) => {
   //listen to message
   socket.on('sendMessage', async (msgData) => {
     console.log('Received a new message: ', msgData);
+    const currentTime = new Date();
+    const timeHash = currentTime.toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const msgId = `${timeHash}-${randomStr}`;
 
     const newMessage = new Message({
-      _id: msgData._id,
+      _id: msgId,
       senderId: msgData.senderId,
       chatId: msgData.chatId,
       message: msgData.message,
-      status: msgData.status,
-      timestamp: msgData.timestamp,
+      status: 'sent',
+      timestamp: currentTime,
     });
     await newMessage.save();
 

@@ -44,7 +44,7 @@ exports.getChatsByUser = async (req, res) => {
 };
 
 exports.createChat = async (req, res) => {
-  const { user_a, user_b } = req.params;
+  const { user_a, user_b } = req.body;
 
   if (!user_a || !user_b) {
     return res.status(400).json({error: 'One or more user id missing'});
