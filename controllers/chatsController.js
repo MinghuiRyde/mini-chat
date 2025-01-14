@@ -1,5 +1,6 @@
 const Chat = require('../models/Chat');
 const User = require('../models/User');
+const crypto = require('crypto');
 
 exports.getChatsByUser = async (req, res) => {
   try {
@@ -50,7 +51,9 @@ exports.createChat = async (req, res) => {
   }
 
   try {
-    const chatId = [user_a, user_b].sort().join('_');
+    const seed = [user_a, user_b].sort().join('_');
+    const hash = crypto.createHash('sha256').update(seed).digest('base64');
+    const chatId = hash.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6);
     let chat = await Chat.findById(chatId);
 
     if (!chat) {
@@ -63,7 +66,7 @@ exports.createChat = async (req, res) => {
       });
       await chat.save();
     }
-    res.status(200).json(chat);
+    res.status(200).json({ chat_id: chatId });
   } catch (error) {
     console.log(error);
     res.status(500).json({error: error.message});
