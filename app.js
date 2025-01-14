@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://mini-chat-rig7.onrender.com',
+    origin: ['https://mini-chat-rig7.onrender.com', 'http://localhost:8080', 'http://127.0.0.1:8080'],
   }
 });
 
@@ -110,4 +110,4 @@ io.on('connection', (socket) => {
 
 // start server
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => console.log(`Listening on ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`Listening on ${PORT}`));
