@@ -6,7 +6,6 @@ exports.getRecipients = async (req, res) => {
     const recipient = await User.findById(recipient_id);
 
     const resData = {
-      id: recipient_id,
       nickname: recipient.nickname,
       avatar_url: recipient.avatarUrl,
     }
