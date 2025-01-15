@@ -10,7 +10,7 @@ exports.getRecipients = async (req, res) => {
       avatar_url: recipient.avatarUrl,
     }
 
-    res.status(200).json({ recipient: resData });
+    res.status(200).json( resData );
   } catch (error) {
     res.status(500).json({error: error.message});
   }

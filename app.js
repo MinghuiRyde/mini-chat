@@ -123,12 +123,6 @@ async function handleSendMessage(ws, msgData) {
   }
 
   const userId = chat.participants.find(participant => participant.user_id !== sender_id);
-  const user = User.findById(userId);
-  if (!user) {
-    console.error('Receiver does not exist');
-    sendError(ws, 'Receiver does not exist');
-    return;
-  }
 
   const currentTime = new Date();
   const timeHash = Date.now().toString(36);
@@ -155,8 +149,7 @@ async function handleSendMessage(ws, msgData) {
   const resData = {
     event: 'receiveMessage',
     sender_id: sender_id,
-    recipients_nickname: user.nickname,
-    recipients_avatar_url: user.avatarUrl,
+    recipients_id: userId,
     content: message,
     timestamp: currentTime,
     status: 'sent',
