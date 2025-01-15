@@ -51,7 +51,7 @@ exports.createChat = async (req, res) => {
     return res.status(400).json({error: 'One or more user id missing'});
   }
 
-  if (!User.findById(user_a) || !User.findById(user_b)) {
+  if (! await User.findById(user_a) || ! await User.findById(user_b)) {
     return res.status(401).json({error: 'Some user dose not exist in the database'});
   }
 
