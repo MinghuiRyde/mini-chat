@@ -11,6 +11,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Message = require('./models/Message');
 const User = require('./models/User');
+const Chat = require('./models/Chat');
 
 const app = express();
 const server = http.createServer(app);
@@ -62,16 +63,25 @@ io.on('connection', (socket) => {
     }
 
     const currentTime = new Date();
-    const timeHash = currentTime.toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 8);
+    const timeHash = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 6);
     const msgId = `${timeHash}-${randomStr}`;
-
+    let chat = await Chat.findById(msgData.chat_id);
     const user = await User.findById(msgData.receiver_id);
     if (!user) {
       console.error('User does not exist');
       socket.emit('error', { message: 'User not found.' });
       return;
     }
+
+    if (!chat) {
+      console.error('No such chat');
+      socket.emit('error', { message: 'No such chat' });
+      return;
+    }
+
+    chat.lastMessage = msgData.message;
+    chat.lastMessageTimestamp = currentTime;
 
     const newMessage = new Message({
       _id: msgId,
@@ -82,7 +92,9 @@ io.on('connection', (socket) => {
       timestamp: currentTime,
     });
 
+
     try {
+      await chat.save();
       await newMessage.save();
     } catch (error) {
       console.error('Error saving message:', error);
