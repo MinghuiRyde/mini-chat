@@ -109,7 +109,7 @@ async function handleSendMessage(ws, msgData) {
 
   const { sender_id, chat_id, message } = msgData;
 
-  if (!sender_id || !chat_id || !receiver_id || !message) {
+  if (!sender_id || !chat_id || !message) {
     console.error('Invalid message data:', msgData);
     sendError(ws, 'Invalid message data');
     return;
