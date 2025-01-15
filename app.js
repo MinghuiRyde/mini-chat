@@ -16,11 +16,6 @@ const Chat = require('./models/Chat');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-// const io = new Server(server, {
-//   cors: {
-//     origin: ['https://mini-chat-rig7.onrender.com', 'http://localhost:8080', 'http://127.0.0.1:8080'],
-//   }
-// });
 
 app.use(express.json());
 
@@ -75,7 +70,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-function removeSocketFromRooms(ws, parsedData) {
+function removeSocketFromRooms(ws) {
   for (const [chatId, sockets] of chatRooms.entries()) {
     const index = sockets.indexOf(ws);
     if (index !== -1) {

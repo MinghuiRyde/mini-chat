@@ -28,6 +28,7 @@ exports.getChatsByUser = async (req, res) => {
       const recipient = recipientMap[recipientId];
       return {
         chat_id: chat._id,
+        recipients_id: recipientId,
         recipients_nickname: recipient ? recipient.nickname : user.nickname,
         recipients_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
         last_message: chat.lastMessage,
