@@ -12,9 +12,10 @@ exports.getChatsByUser = async (req, res) => {
       res.status(200).json({ chats: [] });
     } else {
       const chatList = chats.map(chat => {
+        const recipientsId = chat.participants.find(participant => participant !== user_id);
         return {
           chat_id: chat._id,
-          recipients_id: chat.participants.find(participant => participant !== user_id),
+          recipients_id: recipientsId ? recipientsId : chat.participants[0],
           last_message: chat.lastMessage,
           last_message_time: chat.lastMessageTimestamp,
           unread_count: chat.unreadCount,
