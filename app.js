@@ -107,7 +107,7 @@ function handleJoinChat(ws, { chat_id }) {
 async function handleSendMessage(ws, msgData) {
   console.log('Received a new message:', msgData);
 
-  const { sender_id, receiver_id, chat_id, message } = msgData;
+  const { sender_id, chat_id, message } = msgData;
 
   if (!sender_id || !chat_id || !receiver_id || !message) {
     console.error('Invalid message data:', msgData);
@@ -115,17 +115,18 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
-  const user = await User.findById(receiver_id);
-  if (!user) {
-    console.error('Receiver does not exist');
-    sendError(ws, 'Receiver does not exist');
-    return;
-  }
-
   let chat = await Chat.findById(chat_id);
   if (!chat) {
     console.error('No such chat:', chat_id);
     sendError(ws, 'Chat does not exist');
+    return;
+  }
+
+  const userId = chat.participants.find(participant => participant.user_id !== sender_id);
+  const user = User.findById(userId);
+  if (!user) {
+    console.error('Receiver does not exist');
+    sendError(ws, 'Receiver does not exist');
     return;
   }
 

@@ -14,21 +14,14 @@ exports.getMessagesByChatId = async (req, res) => {
       return res.status(200).json({ messages: [] });
     }
 
-    const userId = messages[0].senderId;
     const chat = await Chat.findOne({ _id: chat_id });
-    const user = await User.findOne({ _id: userId });
 
     if (!chat) {
       return res.status(404).json({ error: 'Chat Not Found' });
     }
 
-    const recipientId = chat.participants.find(participant => participant !== userId);
-    const recipient = recipientId ? await User.findById(recipientId) : null;
-
     const messageList = messages.map(msg => ({
-      sender_id: msg.senderId,
-      recipients_nickname: recipient ? recipient.nickname : user.nickname,
-      recipients_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
+      members: chat.participants,
       content: msg.message,
       timestamp: msg.timestamp,
       status: msg.status
