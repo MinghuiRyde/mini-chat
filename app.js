@@ -8,18 +8,19 @@ const chatsRoutes = require('./routes/chats');
 const recipientsRoutes = require('./routes/recipients');
 
 const http = require('http');
-const { Server } = require('socket.io');
+const { WebSocket } = require('ws');
 const Message = require('./models/Message');
 const User = require('./models/User');
 const Chat = require('./models/Chat');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: ['https://mini-chat-rig7.onrender.com', 'http://localhost:8080', 'http://127.0.0.1:8080'],
-  }
-});
+const wss = new WebSocket.Server({ server });
+// const io = new Server(server, {
+//   cors: {
+//     origin: ['https://mini-chat-rig7.onrender.com', 'http://localhost:8080', 'http://127.0.0.1:8080'],
+//   }
+// });
 
 app.use(express.json());
 
@@ -39,86 +40,152 @@ app.use('/api/messages', messagesRoutes);
 app.use('/api/chats', chatsRoutes);
 app.use('/api/recipients', recipientsRoutes);
 
-//sockets
-io.on('connection', (socket) => {
-  console.log(`Received a new connection: ${socket.id}`);
+const chatRooms = new Map();
 
-  //listen to join event
-  socket.on('joinChat', (msgData) => {
-    if (!msgData || !msgData.chat_id) {
-      console.log('Invalid message:', msgData);
-      return;
-    }
-    socket.join(msgData.chat_id);
-    console.log(`Socket ${socket.id} joined chat: ${msgData.chat_id}`);
-  });
+//websockets
+wss.on('connection', (ws) => {
+  console.log('New connection established');
 
-  //listen to message
-  socket.on('sendMessage', async (msgData) => {
-    console.log('Received a new message: ', msgData);
-    if (!msgData || !msgData.sender_id || !msgData.chat_id || !msgData.message) {
-      console.error('Invalid sendMessage data:', msgData);
-      socket.emit('error', { message: 'Invalid message data' });
-      return;
-    }
-
-    const currentTime = new Date();
-    const timeHash = Date.now().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 6);
-    const msgId = `${timeHash}-${randomStr}`;
-    let chat = await Chat.findById(msgData.chat_id);
-    const user = await User.findById(msgData.receiver_id);
-    if (!user) {
-      console.error('User does not exist');
-      socket.emit('error', { message: 'User not found.' });
-      return;
-    }
-
-    if (!chat) {
-      console.error('No such chat');
-      socket.emit('error', { message: 'No such chat' });
-      return;
-    }
-
-    chat.lastMessage = msgData.message;
-    chat.lastMessageTimestamp = currentTime;
-
-    const newMessage = new Message({
-      _id: msgId,
-      senderId: msgData.sender_id,
-      chatId: msgData.chat_id,
-      message: msgData.message,
-      status: 'sent',
-      timestamp: currentTime,
-    });
-
+  ws.on('message', async (data) => {
+    let parsedData;
 
     try {
-      await chat.save();
-      await newMessage.save();
+      parsedData = JSON.parse(data);
     } catch (error) {
-      console.error('Error saving message:', error);
-      socket.emit('error', { message: 'Failed to save message' });
+      console.log("Failed to parse", error);
       return;
     }
+    const { event } = parsedData;
 
-    const resData = {
-      sender_id: msgData.sender_id,
-      recipients_nickname: user.nickname,
-      recipients_avatar_url: user.avatarUrl,
-      content: msgData.message,
-      timestamp: currentTime,
-      status: 'sent',
+    switch (event) {
+      case 'joinChat':
+        handleJoinChat(ws, parsedData);
+        break;
+      case 'sendMessage':
+        await handleSendMessage(ws, parsedData);
+        break;
+      default:
+        console.log('Received unknown event:', event);
     }
-
-    io.to(msgData.chatId).emit('receiveMessage', resData);
   });
 
-  //disconnect
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected');
+  ws.on('close', () => {
+    console.log('Disconnected');
+    removeSocketFromRooms(ws);
   });
 });
+
+function removeSocketFromRooms(ws, parsedData) {
+  for (const [chatId, sockets] of chatRooms.entries()) {
+    const index = sockets.indexOf(ws);
+    if (index !== -1) {
+      sockets.splice(index, 1);
+      if (sockets.length === 0) {
+        chatRooms.delete(chatId);
+      }
+    }
+  }
+}
+
+function handleJoinChat(ws, { chat_id }) {
+  if (!chat_id) {
+    console.log('Chat ID is missing');
+    return;
+  }
+
+  console.log('Client joined chat:', chat_id);
+
+  if (!chatRooms.has(chat_id)) {
+    chatRooms.set(chat_id, []);
+  }
+
+  chatRooms.get(chat_id).push(ws);
+
+  ws.currentChatId = chat_id;
+}
+
+async function handleSendMessage(ws, msgData) {
+  console.log('Received a new message:', msgData);
+
+  const { sender_id, receiver_id, chat_id, message } = msgData;
+
+  if (!sender_id || !chat_id || !receiver_id || !message) {
+    console.error('Invalid message data:', msgData);
+    sendError(ws, 'Invalid message data');
+    return;
+  }
+
+  const user = await User.findById(receiver_id);
+  if (!user) {
+    console.error('Receiver does not exist');
+    sendError(ws, 'Receiver does not exist');
+    return;
+  }
+
+  let chat = await Chat.findById(chat_id);
+  if (!chat) {
+    console.error('No such chat:', chat_id);
+    sendError(ws, 'Chat does not exist');
+    return;
+  }
+
+  const currentTime = new Date();
+  const timeHash = Date.now().toString(36);
+  const randomStr = Math.random().toString(36).substring(2, 6);
+  const msgId = `${timeHash}-${randomStr}`;
+
+  const newMessage = new Message({
+    _id: msgId,
+    senderId: sender_id,
+    chatId: chat_id,
+    message: message,
+    status: 'sent',
+    timestamp: currentTime,
+  })
+
+  try {
+    await newMessage.save();
+  } catch (error) {
+    console.error('Error saving message:', error);
+    sendError(ws, 'Failed to save message');
+    return;
+  }
+
+  const resData = {
+    event: 'receiveMessage',
+    sender_id: sender_id,
+    recipients_nickname: user.nickname,
+    recipients_avatar_url: user.avatarUrl,
+    content: message,
+    timestamp: currentTime,
+    status: 'sent',
+  }
+
+  //send message to the room
+  const room = chatRooms.get(chat_id) || [];
+  room.forEach((clientWs) => {
+    if (clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(resData));
+    }
+  });
+
+  chat.lastMessage = message;
+  chat.lastMessageTimestamp = currentTime;
+
+  try {
+    await chat.save();
+  } catch (error) {
+    console.error('Error saving chat:', error);
+    sendError(ws, 'Failed to save chat');
+  }
+}
+
+function sendError(ws, message) {
+  ws.send(JSON.stringify({
+    event: 'error',
+    message,
+  }));
+}
 
 // start server
 const PORT = process.env.PORT || 8080;
