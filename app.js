@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const luxon = require('luxon');
+const { DateTime } = require('luxon');
 
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
