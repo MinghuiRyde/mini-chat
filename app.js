@@ -133,14 +133,6 @@ async function handleSendMessage(ws, msgData) {
     timestamp: currentTime,
   })
 
-  try {
-    await newMessage.save();
-  } catch (error) {
-    console.error('Error saving message:', error);
-    sendError(ws, 'Failed to save message');
-    return;
-  }
-
   const resData = {
     event: 'receiveMessage',
     sender_id: sender_id,
@@ -148,6 +140,14 @@ async function handleSendMessage(ws, msgData) {
     content: message,
     timestamp: currentTime,
     status: 'sent',
+  }
+
+  try {
+    await newMessage.save();
+  } catch (error) {
+    console.error('Error saving message:', error);
+    sendError(ws, 'Failed to save message');
+    return;
   }
 
   //send message to the room
