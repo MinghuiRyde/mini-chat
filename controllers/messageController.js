@@ -39,6 +39,7 @@ exports.getMessagesByChatId = async (req, res) => {
         nickname: receiver.nickname,
         avatar_url: receiver.avatarUrl,
       },
+      msg_id: msg._id,
       content: msg.message,
       timestamp: msg.timestamp,
       status: msg.status
