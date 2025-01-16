@@ -24,11 +24,12 @@ exports.getChatsByUser = async (req, res) => {
     }, {});
 
     const chatList = chats.map(chat => {
-      const recipientId = chat.participants.find(participant => participant !== user_id);
+      let recipientId = chat.participants.find(participant => participant !== user_id);
       const recipient = recipientMap[recipientId];
+      recipientId = recipientId ? recipientId : user_id;
       return {
         chat_id: chat._id,
-        recipients_id: recipientId ? recipientId : chat.participants[0],
+        recipients_id: recipientId,
         recipients_nickname: recipient ? recipient.nickname : user.nickname,
         recipients_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
         last_message: chat.lastMessage,
