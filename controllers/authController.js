@@ -1,3 +1,4 @@
+const luxon = require('luxon');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
@@ -5,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const defaultUrl = 'https://images.squarespace-cdn.com/content/v1/6670add926f2a64cd00fb0e7/d2f9b9c1-ab9c-4fe2-a793-d6a8634ac920/character+chii.png';
 
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
+const {DateTime} = require("luxon");
 
 exports.login = async (req, res) => {
   const { auth_code, nickname, avatar_url } = req.body;
@@ -29,6 +31,7 @@ exports.login = async (req, res) => {
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.SESSION_EXPIRES,
       });
+      const currentTime = DateTime.now().setZone("Asia/Singapore").toJSDate();
       user = new User({
         _id: userId,
         sessionToken: session_token,
@@ -39,7 +42,7 @@ exports.login = async (req, res) => {
       const dummyChat = new Chat({
         _id: `${userId}chat0`,
         lastMessage: `Welcome ${nickname}!`,
-        lastMessageTimestamp: new Date(),
+        lastMessageTimestamp: currentTime,
         participants: [userId, userId],
         unreadCount: {
           [userId]: 1,
@@ -52,7 +55,7 @@ exports.login = async (req, res) => {
         chatId: dummyChat._id,
         message: `Welcome ${nickname}!`,
         status: 'read',
-        timestamp: new Date(),
+        timestamp: currentTime,
       })
 
       await user.save();

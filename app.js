@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const luxon = require('luxon');
 
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
@@ -119,8 +120,8 @@ async function handleSendMessage(ws, msgData) {
 
   let userId = chat.participants.find(participant => participant !== sender_id);
   userId = userId ? userId : sender_id;
-  
-  const currentTime = new Date();
+
+  const currentTime = DateTime.now().setZone("Asia/Singapore").toJSDate();
   const timeHash = Date.now().toString(36);
   const randomStr = Math.random().toString(36).substring(2, 6);
   const msgId = `${timeHash}-${randomStr}`;
