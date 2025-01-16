@@ -152,15 +152,20 @@ async function handleSendMessage(ws, msgData) {
 
   //send message to the room
   const room = chatRooms.get(chat_id) || [];
-  room.forEach((clientWs) => {
-    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send(JSON.stringify(resData));
-    }
-  });
+  if (room.length === 1) {
+    room[0].send(JSON.stringify(resData));
+  } else {
+    room.forEach((clientWs) => {
+      if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+        clientWs.send(JSON.stringify(resData));
+      }
+    });
+  }
 
   // update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
+  chat.unreadCount[userId] += 1;
 
   try {
     await chat.save();

@@ -5,7 +5,7 @@ const ChatSchema = mongoose.Schema({
   lastMessage: String,
   lastMessageTimestamp: Date,
   participants: [String],
-  unreadCount: { type: Number , default: 0 },
+  unreadCount: Object,
 });
 
 module.exports = mongoose.model('Chat', ChatSchema);

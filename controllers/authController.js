@@ -41,7 +41,9 @@ exports.login = async (req, res) => {
         lastMessage: `Welcome ${nickname}!`,
         lastMessageTimestamp: new Date(),
         participants: [userId, userId],
-        unreadCount: 1,
+        unreadCount: {
+          [userId]: 1,
+        }
       })
 
       const dummyMsg = new Message({

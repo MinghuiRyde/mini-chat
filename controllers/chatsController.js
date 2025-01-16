@@ -1,5 +1,6 @@
 const Chat = require('../models/Chat');
 const User = require('../models/User');
+const Message = require('../models/Message');
 const crypto = require('crypto');
 
 exports.getChatsByUser = async (req, res) => {
@@ -34,7 +35,7 @@ exports.getChatsByUser = async (req, res) => {
         recipients_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
         last_message: chat.lastMessage,
         last_message_time: chat.lastMessageTimestamp,
-        unread_count: chat.unreadCount,
+        unread_count: chat.unreadCount[recipientId],
       };
     });
 
@@ -68,11 +69,32 @@ exports.createChat = async (req, res) => {
         lastMessage: '',
         lastMessageTimestamp: new Date(),
         participants: [user_a, user_b],
-        unreadCount: 0,
+        unreadCount: {
+          [user_a]: 0,
+          [user_b]: 0,
+        },
       });
       await chat.save();
     }
     res.status(200).json({ chat_id: chatId });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({error: error.message});
+  }
+};
+
+exports.updateReadStatus = async (req, res) => {
+  const { chat_id, viewer_id } = req.body;
+  try {
+    await Message.updateMany({
+      chatId: chat_id,
+      senderId: { $ne: viewer_id },
+      status: { $ne: 'read'},
+    }, { $set: { status: 'read' } });
+    console.log(`Updated chats in ${chat_id} to read for User ${viewer_id}`);
+    res.status(200).json({
+      message: `Updated chats in ${chat_id} to ${viewer_id}`,
+    })
   } catch (error) {
     console.log(error);
     res.status(500).json({error: error.message});
