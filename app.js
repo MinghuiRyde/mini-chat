@@ -117,8 +117,9 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
-  const userId = chat.participants.find(participant => participant.user_id !== sender_id);
-
+  let userId = chat.participants.find(participant => participant !== sender_id);
+  userId = userId ? userId : sender_id;
+  
   const currentTime = new Date();
   const timeHash = Date.now().toString(36);
   const randomStr = Math.random().toString(36).substring(2, 6);
