@@ -157,7 +157,8 @@ async function handleSendMessage(ws, msgData) {
       clientWs.send(JSON.stringify(resData));
     }
   });
-
+  
+  // update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
 
