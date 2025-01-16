@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const defaultUrl = 'https://images.squarespace-cdn.com/content/v1/6670add926f2a64cd00fb0e7/d2f9b9c1-ab9c-4fe2-a793-d6a8634ac920/character+chii.png';
 
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
-const {DateTime} = require("luxon");
 
 exports.login = async (req, res) => {
   const { auth_code, nickname, avatar_url } = req.body;
