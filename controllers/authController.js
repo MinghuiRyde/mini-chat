@@ -30,7 +30,10 @@ exports.login = async (req, res) => {
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.SESSION_EXPIRES,
       });
-      const currentTime = DateTime.now().setZone("Asia/Singapore").toJSDate();
+      const currentTime = new Date(
+        new Date().getTime() + (8 * 60 * 60 * 1000),
+      );
+
       user = new User({
         _id: userId,
         sessionToken: session_token,

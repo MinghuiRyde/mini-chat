@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { DateTime } = require('luxon');
 
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
@@ -11,7 +10,6 @@ const recipientsRoutes = require('./routes/recipients');
 const http = require('http');
 const { WebSocket } = require('ws');
 const Message = require('./models/Message');
-const User = require('./models/User');
 const Chat = require('./models/Chat');
 
 const app = express();
@@ -121,7 +119,9 @@ async function handleSendMessage(ws, msgData) {
   let userId = chat.participants.find(participant => participant !== sender_id);
   userId = userId ? userId : sender_id;
 
-  const currentTime = DateTime.now().setZone("Asia/Singapore").toJSDate();
+  const currentTime = new Date(
+    new Date().getTime() + (8 * 60 * 60 * 1000),
+  );
   const timeHash = Date.now().toString(36);
   const randomStr = Math.random().toString(36).substring(2, 6);
   const msgId = `${timeHash}-${randomStr}`;
@@ -163,7 +163,7 @@ async function handleSendMessage(ws, msgData) {
       }
     });
   }
-
+  console.log('sent new message at:', currentTime);
   // update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
