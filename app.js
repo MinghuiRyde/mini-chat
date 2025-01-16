@@ -153,11 +153,11 @@ async function handleSendMessage(ws, msgData) {
   //send message to the room
   const room = chatRooms.get(chat_id) || [];
   room.forEach((clientWs) => {
-    if (clientWs.readyState === WebSocket.OPEN) {
+    if (clentWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(resData));
     }
   });
-  
+
   // update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
