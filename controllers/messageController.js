@@ -58,7 +58,7 @@ exports.getMessagesByChatId = async (req, res) => {
       timestamp: msg.timestamp,
       status: msg.status
     }));
-    
+
     res.status(200).json({
       messages: messageList,
       has_more: offset + limit < totalMsgNum,

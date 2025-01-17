@@ -165,7 +165,8 @@ async function handleSendMessage(ws, msgData) {
   // update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
-  chat.unreadCount[userId] += 1;
+  chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
+  chat.markModified('unreadCount');
 
   try {
     await chat.save();
