@@ -35,7 +35,7 @@ exports.getChatsByUser = async (req, res) => {
         recipients_avatar_url: recipient ? recipient.avatarUrl : user.avatarUrl,
         last_message: chat.lastMessage,
         last_message_time: chat.lastMessageTimestamp,
-        unread_count: chat.unreadCount[recipientId],
+        unread_count: chat.unreadCount[user_id],
       };
     });
 

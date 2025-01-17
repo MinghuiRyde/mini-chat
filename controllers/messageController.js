@@ -36,28 +36,32 @@ exports.getMessagesByChatId = async (req, res) => {
     if (!messages.length) {
       return res.status(200).json({ messages: [] });
     }
-    const senderId = messages[0].senderId;
-    let receiverId = chat.participants.find(participant => participant !== senderId);
-    receiverId = receiverId ? receiverId : chat.participants[0];
-    const sender = await User.findById(senderId);
-    const receiver = await User.findById(receiverId);
 
-    const messageList = messages.map(msg => ({
-      sender: {
-        user_id: senderId,
-        nickname: sender.nickname,
-        avatar_url: sender.avatarUrl,
-      },
-      receiver: {
-        user_id: receiverId,
-        nickname: receiver.nickname,
-        avatar_url: receiver.avatarUrl,
-      },
-      msg_id: msg._id,
-      content: msg.message,
-      timestamp: msg.timestamp,
-      status: msg.status
-    }));
+
+    const messageList = messages.map(async(msg) => {
+      const senderId = msg.senderId;
+      let receiverId = chat.participants.find(participant => participant !== senderId);
+      receiverId = receiverId ? receiverId : senderId;
+      const sender = await User.findById(senderId);
+      const receiver = await User.findById(receiverId);
+
+      return {
+        sender: {
+          user_id: senderId,
+            nickname: sender.nickname,
+            avatar_url: sender.avatarUrl,
+        },
+        receiver: {
+          user_id: receiverId,
+            nickname: receiver.nickname,
+            avatar_url: receiver.avatarUrl,
+        },
+        msg_id: msg._id,
+          content: msg.message,
+        timestamp: msg.timestamp,
+        status: msg.status
+      }
+    });
 
     res.status(200).json({
       messages: messageList,

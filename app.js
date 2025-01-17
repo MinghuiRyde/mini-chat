@@ -133,6 +133,7 @@ async function handleSendMessage(ws, msgData) {
     timestamp: currentTime,
   })
 
+  // format to be decided
   const resData = {
     event: 'receiveMessage',
     sender_id: sender_id,
