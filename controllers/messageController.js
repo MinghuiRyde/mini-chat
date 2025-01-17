@@ -36,9 +36,7 @@ exports.getMessagesByChatId = async (req, res) => {
     if (!messages.length) {
       return res.status(200).json({ messages: [] });
     }
-
-
-    const messageList = messages.map(async(msg) => {
+    const messageList = await Promise.all(messages.map(async(msg) => {
       const senderId = msg.senderId;
       let receiverId = chat.participants.find(participant => participant !== senderId);
       receiverId = receiverId ? receiverId : senderId;
@@ -48,20 +46,20 @@ exports.getMessagesByChatId = async (req, res) => {
       return {
         sender: {
           user_id: senderId,
-            nickname: sender.nickname,
-            avatar_url: sender.avatarUrl,
+          nickname: sender.nickname,
+          avatar_url: sender.avatarUrl,
         },
         receiver: {
           user_id: receiverId,
-            nickname: receiver.nickname,
-            avatar_url: receiver.avatarUrl,
+          nickname: receiver.nickname,
+          avatar_url: receiver.avatarUrl,
         },
         msg_id: msg._id,
-          content: msg.message,
+        content: msg.message,
         timestamp: msg.timestamp,
         status: msg.status
       }
-    });
+    }));
 
     res.status(200).json({
       messages: messageList,
