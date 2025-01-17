@@ -4,15 +4,28 @@ const User = require('../models/User');
 
 exports.getMessagesByChatId = async (req, res) => {
   try {
-    const { chat_id } = req.params;
-    console.log(chat_id);
+    const { chat_id } = req.query;
+    if (!chat_id) {
+      return res.status(400).send({ error: 'Missing chat_id' });
+    }
+
+    const totalMsgNum = await Message.countDocuments({ chatId: chat_id });
+    let { limit = 20, offset = 0 } = req.query;
+    console.log(chat_id, limit, offset);
+    if (offset > totalMsgNum) {
+      return res.status(400).send({ error: 'Offset more than totalMsgNum' });
+    }
+
     const chat = await Chat.findOne({ _id: chat_id });
     if (!chat) {
       return res.status(404).json({ error: 'Chat Not Found' });
     }
 
     //sort in ascending timestamp order
-    const messages = await Message.find({ chatId: chat_id }).sort({ timestamp: -1 });
+    const messages = await Message.find({ chatId: chat_id })
+      .sort({ timestamp: -1 })
+      .skip(offset)
+      .limit(limit);
 
     if (!messages) {
       return res.status(404).json({error: 'no messages found'});
@@ -21,7 +34,6 @@ exports.getMessagesByChatId = async (req, res) => {
     if (!messages.length) {
       return res.status(200).json({ messages: [] });
     }
-
     const senderId = messages[0].senderId;
     let receiverId = chat.participants.find(participant => participant !== senderId);
     receiverId = receiverId ? receiverId : chat.participants[0];
@@ -45,7 +57,10 @@ exports.getMessagesByChatId = async (req, res) => {
       status: msg.status
     }));
 
-    res.status(200).json({ messages: messageList });
+    res.status(200).json({
+      messages: messageList,
+      has_more: offset + limit < totalMsgNum,
+    });
 
   } catch (error) {
     console.log('Error retrieving messages', error);
