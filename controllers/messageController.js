@@ -12,6 +12,8 @@ exports.getMessagesByChatId = async (req, res) => {
     const totalMsgNum = await Message.countDocuments({ chatId: chat_id });
     let { limit = 20, offset = 0 } = req.query;
     console.log(chat_id, limit, offset);
+    limit = Number(limit);
+    offset = Number(offset);
     if (offset > totalMsgNum) {
       return res.status(400).send({ error: 'Offset more than totalMsgNum' });
     }
@@ -56,7 +58,7 @@ exports.getMessagesByChatId = async (req, res) => {
       timestamp: msg.timestamp,
       status: msg.status
     }));
-
+    
     res.status(200).json({
       messages: messageList,
       has_more: offset + limit < totalMsgNum,

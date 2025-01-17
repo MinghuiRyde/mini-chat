@@ -12,13 +12,11 @@ let app, mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri)
-    .then(async () => { console.log('Connected to MongoDB'); })
-    .catch((err) => { console.error(err); });
+  await mongoose.connect(mongoUri);
 
   app = express();
   app.use(express.json());
-  
+
   app.get('/messages', messageController.getMessagesByChatId);
 });
 
