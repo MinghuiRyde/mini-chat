@@ -95,6 +95,10 @@ exports.updateReadStatus = async (req, res) => {
     res.status(200).json({
       message: `Updated chats in ${chat_id} to ${viewer_id}`,
     })
+
+    const chat = await Chat.findById(chat_id);
+    chat.unreadCount[viewer_id] = 0;
+    chat.markModified('unreadCount');
   } catch (error) {
     console.log(error);
     res.status(500).json({error: error.message});
