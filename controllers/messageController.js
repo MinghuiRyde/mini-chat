@@ -38,7 +38,8 @@ exports.getMessagesByChatId = async (req, res) => {
     }
     const messageList = await Promise.all(messages.map(async(msg) => {
       const senderId = msg.senderId;
-      let receiverId = chat.participants.find(participant => participant !== senderId);
+      let receiverId =
+        chat.participants.find(participant => participant !== senderId);
       receiverId = receiverId ? receiverId : senderId;
       const sender = await User.findById(senderId);
       const receiver = await User.findById(receiverId);
