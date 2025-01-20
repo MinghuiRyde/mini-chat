@@ -162,6 +162,7 @@ async function handleSendMessage(ws, msgData) {
       }
     });
   }
+  newMessage.status = 'delivered';
   console.log('sent new message at:', currentTime);
   // update last message and its time for chat
   chat.lastMessage = message;
@@ -170,6 +171,7 @@ async function handleSendMessage(ws, msgData) {
   chat.markModified('unreadCount');
 
   try {
+    await newMessage.save();
     await chat.save();
   } catch (error) {
     console.error('Error saving chat:', error);

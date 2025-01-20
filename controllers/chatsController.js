@@ -105,20 +105,3 @@ exports.updateReadStatus = async (req, res) => {
     res.status(500).json({error: error.message});
   }
 }
-
-exports.updateDeliveredStatus = async (req, res) => {
-  const { chat_id, viewer_id } = req.body;
-  try {
-    await Message.updateMany({
-      chatId: chat_id,
-      senderId: { $ne: viewer_id },
-      status: 'sent',
-    }, { $set: { status: 'delivered' } });
-    console.log(`Updated chats in ${chat_id} to delivered for User ${viewer_id}`);
-    res.status(200).json({
-      message: `Updated chats in ${chat_id} to ${viewer_id}`,
-    })
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-}
