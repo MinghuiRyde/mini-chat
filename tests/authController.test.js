@@ -77,7 +77,7 @@ describe('POST /login', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.session_token).toBe('testSessionToken');
-    expect(res.body.user_id).toBe('testId');
+    expect(res.body.user_id).toBe('d7rLUbQ');
 
     const user = await User.findById(res.body.user_id);
     expect(user).not.toBeNull();
