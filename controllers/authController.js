@@ -7,7 +7,15 @@ const defaultUrl =
 const crypto = require('crypto');
 
 const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
-
+/**
+ *
+ * @param req Request that contains authentication code,
+ * user's nickname and avatar information.
+ * @param res Response that contains session token, token
+ * expiry date and user's id with status code 200 when generation succeed.
+ * Else, respond error message with status code 500.
+ *
+ */
 exports.login = async (req, res) => {
   const { auth_code, nickname, avatar_url } = req.body;
 

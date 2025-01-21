@@ -37,7 +37,8 @@ describe('POST /login', () => {
 
   beforeEach(async () => {
     jwtSignSpy = jest.spyOn(jwt, 'sign').mockReturnValue('testSessionToken');
-    jwtDecodeSpy = jest.spyOn(jwt, 'decode').mockReturnValue({ exp: Math.floor(Date.now() / 1000) + 3600 })
+    jwtDecodeSpy = jest.spyOn(jwt, 'decode')
+      .mockReturnValue({ exp: Math.floor(Date.now() / 1000) + 3600 })
   })
 
   afterEach(async () => {
@@ -84,8 +85,10 @@ describe('POST /login', () => {
     expect(user.nickname).toBe('John Doe');
   });
 
-  it('should return 500 if getSessionKeyAndOpenId throws an error', async () => {
-    getSessionKeyAndOpenId.mockRejectedValue(new Error('Wechat Authentication Error'));
+  it('should return 500 if getSessionKeyAndOpenId throws an error',
+    async () => {
+      getSessionKeyAndOpenId
+      .mockRejectedValue(new Error('Wechat Authentication Error'));
 
     const res = await request(app).post('/login').send({
       auth_code: 'code',

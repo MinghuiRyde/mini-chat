@@ -2,6 +2,16 @@ const Message = require('../models/Message');
 const Chat = require('../models/Chat');
 const User = require('../models/User');
 
+/**
+ * 
+ * @param req Request with query containing chat ID and optional limit and offset.
+ * If limit and offset are not provided, default limit is 20 and offset is 0.
+ * @param res Response with messages in the chat with 
+ * specific ID with status 200 or
+ * error message with status 400 when chat ID is missing or
+ * error message with status 404 when chat is not found or
+ * error message with status 500 when an error occurs.
+ */
 exports.getMessagesByChatId = async (req, res) => {
   try {
     const { chat_id } = req.query;

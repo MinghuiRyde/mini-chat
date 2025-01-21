@@ -18,17 +18,18 @@ const wss = new WebSocket.Server({ server });
 
 app.use(express.json());
 
+// Connect app to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('MongoDB Connected');
 
-    //create indexes for more efficient message history fetching
+    // Create indexes for more efficient message history fetching
     await Message.createIndexes();
     console.log('Indexes created for Message model');
   })
   .catch(err => console.log(err));
 
-//routes
+// Routes for different API endpoints
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/chats', chatsRoutes);
@@ -36,10 +37,11 @@ app.use('/api/recipients', recipientsRoutes);
 
 const chatRooms = new Map();
 
-//websockets
+// WebSocket connection for chatting
 wss.on('connection', (ws) => {
   console.log('New connection established');
 
+  // Handle incoming messages
   ws.on('message', async (data) => {
     let parsedData;
 
@@ -63,12 +65,18 @@ wss.on('connection', (ws) => {
     }
   });
 
+  // Disconnect WebSocket
   ws.on('close', () => {
     console.log('Disconnected');
     removeSocketFromRooms(ws);
   });
 });
 
+/**
+ * 
+ * Remove the socket from all chat rooms when it disconnects.
+ * @param ws websocket to be removed from chat rooms.
+ */
 function removeSocketFromRooms(ws) {
   for (const [chatId, sockets] of chatRooms.entries()) {
     const index = sockets.indexOf(ws);
@@ -81,6 +89,12 @@ function removeSocketFromRooms(ws) {
   }
 }
 
+/**
+ * 
+ * Join the chat room by adding the websocket.
+ * @param ws WebSocket to be added to the chat room.
+ * @param param1 Chat ID for the chat room to join.
+ */
 function handleJoinChat(ws, { chat_id }) {
   if (!chat_id) {
     console.log('Chat ID is missing');
@@ -98,6 +112,12 @@ function handleJoinChat(ws, { chat_id }) {
   ws.currentChatId = chat_id;
 }
 
+/**
+ * 
+ * @param ws WebSocket to send the message.
+ * @param msgData Message data to be sent.
+ * 
+ */
 async function handleSendMessage(ws, msgData) {
   console.log('Received a new message:', msgData);
 
@@ -109,6 +129,7 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
+  // Find the chat
   let chat = await Chat.findById(chat_id);
   if (!chat) {
     console.error('No such chat:', chat_id);
@@ -116,14 +137,17 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
+  // Find the recipient's ID
   let userId = chat.participants.find(participant => participant !== sender_id);
   userId = userId ? userId : sender_id;
 
+  // Create a new message ID with timestamp and random string
   const currentTime = new Date();
   const timeHash = Date.now().toString(36);
   const randomStr = Math.random().toString(36).substring(2, 6);
   const msgId = `${timeHash}-${randomStr}`;
 
+  // Create a new message
   const newMessage = new Message({
     _id: msgId,
     senderId: sender_id,
@@ -133,7 +157,7 @@ async function handleSendMessage(ws, msgData) {
     timestamp: currentTime,
   })
 
-  // format to be decided
+  // Response data for client to display the message
   const resData = {
     event: 'receiveMessage',
     sender_id: sender_id,
@@ -151,7 +175,7 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
-  //send message to the room
+  // Boardcast message to the chat room participants except the sender
   const room = chatRooms.get(chat_id) || [];
   if (room.length === 1) {
     room[0].send(JSON.stringify(resData));
@@ -164,7 +188,8 @@ async function handleSendMessage(ws, msgData) {
   }
   newMessage.status = 'delivered';
   console.log('sent new message at:', currentTime);
-  // update last message and its time for chat
+  
+  // Update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
   chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
@@ -186,6 +211,6 @@ function sendError(ws, message) {
   }));
 }
 
-// start server
+// Start server
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => console.log(`Listening on ${PORT}`));

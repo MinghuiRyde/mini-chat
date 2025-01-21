@@ -3,6 +3,13 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const crypto = require('crypto');
 
+/**
+ * 
+ * @param req Request with parameter user_id.
+ * @param res Response with chats that the user participates in with status 200 or 
+ * error message with status 404 when no chats are found or
+ * error message with status 500 when an error occurs.
+ */
 exports.getChatsByUser = async (req, res) => {
   try {
     const { user_id } = req.params;
@@ -46,6 +53,14 @@ exports.getChatsByUser = async (req, res) => {
   }
 };
 
+/**
+ * 
+ * @param req Request with body containing ids of two users.
+ * @param res Response with chat_id of the chat created with status 200 or
+ * error message with status 400 when one or more user id is missing or
+ * error message with status 401 when some user does not exist in the database or
+ * error message with status 500 when an error occurs.
+ */
 exports.createChat = async (req, res) => {
   const { user_a, user_b } = req.body;
 
@@ -84,6 +99,12 @@ exports.createChat = async (req, res) => {
   }
 };
 
+/**
+ * 
+ * @param req Request with body containing chat ID and viewer's ID.
+ * @param res Response with status 200 when update is successful 
+ * or error message with status 500 when an error occurs.
+ */
 exports.updateReadStatus = async (req, res) => {
   const { chat_id, viewer_id } = req.body;
   try {

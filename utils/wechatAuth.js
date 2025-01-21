@@ -12,8 +12,6 @@ const getSessionKeyAndOpenId = async (auth_code) => {
     throw new Error(`WeChat API Error: ${response.data.errmsg}`);
   }
 
-  //console.log(response.data);
-
   return {
     openId: response.data.openid,
     sessionKey: response.data.session_key,

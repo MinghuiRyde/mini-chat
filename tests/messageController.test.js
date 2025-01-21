@@ -29,8 +29,18 @@ describe('GET /messages', () => {
   let chat, sender, receiver, msg1, msg2;
 
   beforeEach(async () => {
-    sender = await User.create({ _id: 'UserA', sessionToken: 'Token 1', nickname: 'Ace', avatarUrl: 'ace.png' });
-    receiver = await User.create({ _id: 'UserB', sessionToken: 'Token 2', nickname: 'Bob', avatarUrl: 'bob.png' });
+    sender = await User.create({
+      _id: 'UserA',
+      sessionToken: 'Token 1',
+      nickname: 'Ace',
+      avatarUrl: 'ace.png'
+    });
+    receiver = await User.create({
+      _id: 'UserB',
+      sessionToken: 'Token 2',
+      nickname: 'Bob',
+      avatarUrl: 'bob.png'
+    });
 
     chat = await Chat.create({
       _id: 'chat0',
@@ -90,7 +100,8 @@ describe('GET /messages', () => {
   });
 
   it('should handle pagination correctly', async () => {
-    const res = await request(app).get(`/messages?chat_id=${chat._id}&limit=1&offset=0`);
+    const res =
+      await request(app).get(`/messages?chat_id=${chat._id}&limit=1&offset=0`);
     expect(res.status).toBe(200);
     expect(res.body.messages.length).toBe(1);
   });
