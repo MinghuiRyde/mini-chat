@@ -16,6 +16,8 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+const commonRoomID = 'common';
+
 app.use(express.json());
 
 // Connect app to MongoDB
@@ -40,11 +42,11 @@ const chatRooms = new Map();
 // WebSocket connection for chatting
 wss.on('connection', (ws) => {
   console.log('New connection established');
-  const commonRoom = 'common';
-  if (!chatRooms.has(commonRoom)) {
-    chatRooms.set(commonRoom, []);
+
+  if (!chatRooms.has(commonRoomID)) {
+    chatRooms.set(commonRoomID, []);
   }
-  chatRooms.get(commonRoom).push(ws);
+  chatRooms.get(commonRoomID).push(ws);
 
   // Handle incoming messages
   ws.on('message', async (data) => {
@@ -207,7 +209,7 @@ async function handleSendMessage(ws, msgData) {
   newMessage.status = 'delivered';
   console.log('sent new message at:', currentTime);
 
-  const commonRoom = chatRooms.get('common');
+  const commonRoom = chatRooms.get(commonRoomID);
   commonRoom.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(updateData));
