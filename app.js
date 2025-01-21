@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
 const chatsRoutes = require('./routes/chats');
 const recipientsRoutes = require('./routes/recipients');
+const deleteRoutes = require('./routes/delete');
 
 const http = require('http');
 const { WebSocket } = require('ws');
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/chats', chatsRoutes);
 app.use('/api/recipients', recipientsRoutes);
+app.use('/api/delete', deleteRoutes);
 
 const chatRooms = new Map();
 
