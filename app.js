@@ -40,6 +40,11 @@ const chatRooms = new Map();
 // WebSocket connection for chatting
 wss.on('connection', (ws) => {
   console.log('New connection established');
+  const commonRoom = 'common';
+  if (!chatRooms.has(commonRoom)) {
+    chatRooms.set(commonRoom, []);
+  }
+  chatRooms.get(commonRoom).push(ws);
 
   // Handle incoming messages
   ws.on('message', async (data) => {
@@ -68,7 +73,7 @@ wss.on('connection', (ws) => {
   // Disconnect WebSocket
   ws.on('close', () => {
     console.log('Disconnected');
-    removeSocketFromRooms(ws);
+    removeSocketFromRooms(ws, true);
   });
 });
 
@@ -76,10 +81,15 @@ wss.on('connection', (ws) => {
  * 
  * Remove the socket from all chat rooms when it disconnects.
  * @param ws websocket to be removed from chat rooms.
+ * @param flag flag to indicate whether to exit the common room.
  */
-function removeSocketFromRooms(ws) {
+function removeSocketFromRooms(ws, flag = false) {
   for (const [chatId, sockets] of chatRooms.entries()) {
     const index = sockets.indexOf(ws);
+    if (flag && chatId === 'common') {
+      continue;
+    }
+
     if (index !== -1) {
       sockets.splice(index, 1);
       if (sockets.length === 0) {
@@ -167,6 +177,14 @@ async function handleSendMessage(ws, msgData) {
     status: 'sent',
   }
 
+  const updateData = {
+    event: 'updateList',
+    recipients_id: userId,
+    chat_id: chat_id,
+    content: message,
+    timestamp: currentTime,
+  }
+
   try {
     await newMessage.save();
   } catch (error) {
@@ -175,7 +193,7 @@ async function handleSendMessage(ws, msgData) {
     return;
   }
 
-  // Boardcast message to the chat room participants except the sender
+  // Broadcast message to the chat room participants except the sender
   const room = chatRooms.get(chat_id) || [];
   if (room.length === 1) {
     room[0].send(JSON.stringify(resData));
@@ -188,6 +206,13 @@ async function handleSendMessage(ws, msgData) {
   }
   newMessage.status = 'delivered';
   console.log('sent new message at:', currentTime);
+
+  const commonRoom = chatRooms.get('common');
+  commonRoom.forEach((clientWs) => {
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(updateData));
+    }
+  })
   
   // Update last message and its time for chat
   chat.lastMessage = message;
