@@ -33,7 +33,7 @@ exports.getMessagesByChatId = async (req, res) => {
       return res.status(404).json({ error: 'Chat Not Found' });
     }
 
-    //sort in ascending timestamp order
+    //Sort in descending timestamp order
     const messages = await Message.find({ chatId: chat_id })
       .sort({ timestamp: -1 })
       .skip(offset)

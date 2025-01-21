@@ -9,6 +9,7 @@ const MessageSchema = mongoose.Schema({
   timestamp: Date,
 });
 
+// Index Chat ID and timestamp for more efficient query
 MessageSchema.index({ chatId: 1, timestamp: -1 });
 
 module.exports = mongoose.model('Message', MessageSchema);
