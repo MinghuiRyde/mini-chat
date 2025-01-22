@@ -12,6 +12,7 @@ const http = require('http');
 const { WebSocket } = require('ws');
 const Message = require('./models/Message');
 const Chat = require('./models/Chat');
+const User = require('./models/User');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,11 +60,14 @@ wss.on('connection', (ws) => {
     const { event } = parsedData;
     try {
       switch (event) {
-        case 'joinChat':
-          handleJoinChat(ws, parsedData);
+        case 'joinRoom':
+          handleJoinRoom(ws, parsedData);
           break;
         case 'sendMessage':
           await handleSendMessage(ws, parsedData);
+          break;
+        case 'disconnect':
+          removeSocketFromRooms(ws);
           break;
         default:
           console.log('Received unknown event:', event);
@@ -104,7 +108,7 @@ function removeSocketFromRooms(ws) {
  * @param ws WebSocket to be added to the chat room.
  * @param param1 Chat ID for the chat room to join.
  */
-function handleJoinChat(ws, { chat_id }) {
+function handleJoinRoom(ws, { chat_id }) {
   if (!chat_id) {
     console.log('Chat ID is missing');
     return;
@@ -194,8 +198,17 @@ async function handleSendMessage(ws, msgData) {
   });
 
   newMessage.status = 'delivered';
+  const recipient = await User.findById(userId);
 
-  const updateData = {
+  const updateData = chat.lastMessage === '' ? {
+    event: 'addChat',
+    chat_id: chat._id,
+    recipients_id: userId,
+    recipients_nickname: recipient.nickname,
+    recipients_avatar_url: recipient.avatar_url,
+    content: message,
+    timestamp: currentTime,
+  } : {
     event: 'updateList',
     recipients_id: userId,
     chat_id: chat._id,
