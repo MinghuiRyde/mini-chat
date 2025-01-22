@@ -10,6 +10,7 @@ const deleteRoutes = require('./routes/delete');
 
 const http = require('http');
 const { WebSocket } = require('ws');
+const User = require('./models/User');
 const Message = require('./models/Message');
 const Chat = require('./models/Chat');
 
@@ -17,7 +18,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const commonRoomID = 'common';
 
 app.use(express.json());
 
@@ -45,14 +45,7 @@ const chatRooms = new Map();
 wss.on('connection', (ws) => {
   console.log('New connection established');
 
-  if (!chatRooms.has(commonRoomID)) {
-    chatRooms.set(commonRoomID, []);
-  }
-  if (!chatRooms.get(commonRoomID).includes(ws)) {
-    chatRooms.get(commonRoomID).push(ws);
-    console.log('new user joined the common room');
-  }
-  console.log('common room volume: ', chatRooms.get(commonRoomID).length);
+  console.log('common room volume: ', wss.clients.size);
 
   // Handle incoming messages
   ws.on('message', async (data) => {
@@ -166,6 +159,7 @@ async function handleSendMessage(ws, msgData) {
   // Find the recipient's ID
   let userId = chat.participants.find(participant => participant !== sender_id);
   userId = userId ? userId : sender_id;
+  const recipient = await User.findById(userId);
 
   // Create a new message ID with timestamp and random string
   const currentTime = new Date();
@@ -193,14 +187,6 @@ async function handleSendMessage(ws, msgData) {
     status: 'sent',
   }
 
-  const updateData = {
-    event: 'updateList',
-    recipients_id: userId,
-    chat_id: chat_id,
-    content: message,
-    timestamp: currentTime,
-  }
-
   try {
     await newMessage.save();
   } catch (error) {
@@ -219,21 +205,29 @@ async function handleSendMessage(ws, msgData) {
   });
 
   newMessage.status = 'delivered';
-
-  // Send update message in the common socket room for chat list updates
-  const commonRoom = chatRooms.get(commonRoomID);
-  commonRoom.forEach((clientWs) => {
-    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send(JSON.stringify(updateData));
-      console.log('sent update message: ', updateData);
-    }
-  });
-  
   // Update last message and its time for chat
   chat.lastMessage = message;
   chat.lastMessageTimestamp = currentTime;
   chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
   chat.markModified('unreadCount');
+
+  const updateData = {
+    event: 'updateList',
+    chat_id: chat._id,
+    recipients_id: userId,
+    recipients_nickname: recipient.nickname,
+    recipients_avatar_url: recipient.avatarUrl,
+    last_message: message,
+    last_message_time: currentTime,
+  }
+
+  // Send update message in the common socket room for chat list updates
+  wss.clients.forEach((clientWs) => {
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(updateData));
+      console.log('sent update message: ', updateData);
+    }
+  });
 
   try {
     await newMessage.save();

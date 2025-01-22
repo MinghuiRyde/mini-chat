@@ -19,7 +19,7 @@ exports.deleteChatOrMessage = async (req, res) => {
       default:
         res.status(500).json({error: 'undefined type'});
     }
-    res.status(200).json({ message: 'deletion successfully' });
+    res.status(200).json({ message: 'deletion successful' });
   } catch (error) {
     res.status(500).json({error: error});
   }
