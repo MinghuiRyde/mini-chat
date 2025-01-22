@@ -10,7 +10,6 @@ const deleteRoutes = require('./routes/delete');
 
 const http = require('http');
 const { WebSocket } = require('ws');
-const User = require('./models/User');
 const Message = require('./models/Message');
 const Chat = require('./models/Chat');
 
@@ -150,7 +149,6 @@ async function handleSendMessage(ws, msgData) {
   // Find the recipient's ID
   let userId = chat.participants.find(participant => participant !== sender_id);
   userId = userId ? userId : sender_id;
-  const recipient = await User.findById(userId);
 
   // Create a new message ID with timestamp and random string
   const currentTime = new Date();
@@ -218,7 +216,7 @@ async function handleSendMessage(ws, msgData) {
   chat.lastMessage = message;
   chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
   chat.markModified('unreadCount');
-  
+
   try {
     await newMessage.save();
     await chat.save();
