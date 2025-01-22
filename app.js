@@ -66,9 +66,6 @@ wss.on('connection', (ws) => {
         case 'sendMessage':
           await handleSendMessage(ws, parsedData);
           break;
-        case 'leave':
-          removeSocketFromRooms(ws, true);
-          break;
         default:
           console.log('Received unknown event:', event);
       }
@@ -81,7 +78,7 @@ wss.on('connection', (ws) => {
   // Disconnect WebSocket
   ws.on('close', () => {
     console.log('Disconnected');
-    removeSocketFromRooms(ws, false);
+    removeSocketFromRooms(ws);
   });
 });
 
@@ -89,16 +86,10 @@ wss.on('connection', (ws) => {
  * 
  * Remove the socket from all chat rooms when it disconnects.
  * @param ws websocket to be removed from chat rooms.
- * @param flag flag to indicate whether to exit the common room.
  */
-function removeSocketFromRooms(ws, flag = false) {
+function removeSocketFromRooms(ws) {
   for (const [chatId, sockets] of chatRooms.entries()) {
     const index = sockets.indexOf(ws);
-    if (flag && chatId === 'common') {
-      console.log('A user left room ', chatId);
-      continue;
-    }
-
     if (index !== -1) {
       sockets.splice(index, 1);
       if (sockets.length === 0) {
