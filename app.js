@@ -115,6 +115,7 @@ function handleJoinRoom(ws, { chat_id }) {
   }
 
   console.log('Client joined chat:', chat_id);
+  ws.send(JSON.stringify('Client joined chat:' + chat_id));
 
   if (!chatRooms.has(chat_id)) {
     chatRooms.set(chat_id, []);
