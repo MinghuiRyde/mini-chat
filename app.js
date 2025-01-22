@@ -205,7 +205,7 @@ async function handleSendMessage(ws, msgData) {
     chat_id: chat._id,
     recipients_id: userId,
     recipients_nickname: recipient.nickname,
-    recipients_avatar_url: recipient.avatar_url,
+    recipients_avatar_url: recipient.avatarUrl,
     content: message,
     timestamp: currentTime,
   } : {
