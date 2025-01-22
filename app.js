@@ -48,7 +48,11 @@ wss.on('connection', (ws) => {
   if (!chatRooms.has(commonRoomID)) {
     chatRooms.set(commonRoomID, []);
   }
-  chatRooms.get(commonRoomID).push(ws);
+  if (!chatRooms.get(commonRoomID).includes(ws)) {
+    chatRooms.get(commonRoomID).push(ws);
+    console.log('new user joined the common room');
+  }
+  console.log('common room volume: ', chatRooms.get(commonRoomID).length);
 
   // Handle incoming messages
   ws.on('message', async (data) => {
@@ -61,23 +65,30 @@ wss.on('connection', (ws) => {
       return;
     }
     const { event } = parsedData;
+    try {
+      switch (event) {
+        case 'joinChat':
+          handleJoinChat(ws, parsedData);
+          break;
+        case 'sendMessage':
+          await handleSendMessage(ws, parsedData);
+          break;
+        case 'leave':
+          removeSocketFromRooms(ws, true);
+          break;
+        default:
+          console.log('Received unknown event:', event);
+      }
+    } catch (error) {
+      console.log(error);
 
-    switch (event) {
-      case 'joinChat':
-        handleJoinChat(ws, parsedData);
-        break;
-      case 'sendMessage':
-        await handleSendMessage(ws, parsedData);
-        break;
-      default:
-        console.log('Received unknown event:', event);
     }
   });
 
   // Disconnect WebSocket
   ws.on('close', () => {
     console.log('Disconnected');
-    removeSocketFromRooms(ws, true);
+    removeSocketFromRooms(ws, false);
   });
 });
 
@@ -91,6 +102,7 @@ function removeSocketFromRooms(ws, flag = false) {
   for (const [chatId, sockets] of chatRooms.entries()) {
     const index = sockets.indexOf(ws);
     if (flag && chatId === 'common') {
+      console.log('A user left room ', chatId);
       continue;
     }
 
@@ -199,24 +211,23 @@ async function handleSendMessage(ws, msgData) {
 
   // Broadcast message to the chat room participants except the sender
   const room = chatRooms.get(chat_id) || [];
-  if (room.length === 1) {
-    room[0].send(JSON.stringify(resData));
-  } else {
-    room.forEach((clientWs) => {
-      if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-        clientWs.send(JSON.stringify(resData));
-      }
-    });
-  }
-  newMessage.status = 'delivered';
-  console.log('sent new message at:', currentTime);
+  room.forEach((clientWs) => {
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(resData));
+      console.log('sent new message at:', currentTime);
+    }
+  });
 
+  newMessage.status = 'delivered';
+
+  // Send update message in the common socket room for chat list updates
   const commonRoom = chatRooms.get(commonRoomID);
   commonRoom.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(updateData));
+      console.log('sent update message: ', updateData);
     }
-  })
+  });
   
   // Update last message and its time for chat
   chat.lastMessage = message;
