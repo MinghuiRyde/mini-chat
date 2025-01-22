@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
         _id: `${userId}chat0`,
         lastMessage: `Welcome ${nickname}!`,
         lastMessageTimestamp: currentTime,
-        participants: [userId, userId],
+        participants: [userId],
         unreadCount: {
           [userId]: 1,
         }
