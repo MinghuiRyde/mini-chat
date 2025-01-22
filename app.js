@@ -196,21 +196,14 @@ async function handleSendMessage(ws, msgData) {
   });
 
   newMessage.status = 'delivered';
-  // Update last message and its time for chat
-  chat.lastMessage = message;
-  chat.lastMessageTimestamp = currentTime;
-  chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
-  chat.markModified('unreadCount');
 
   const updateData = {
     event: 'updateList',
-    chat_id: chat._id,
     recipients_id: userId,
-    recipients_nickname: recipient.nickname,
-    recipients_avatar_url: recipient.avatarUrl,
-    last_message: message,
-    last_message_time: currentTime,
-  }
+    chat_id: chat._id,
+    content: message,
+    timestamp: currentTime,
+  };
 
   // Send update message in the common socket room for chat list updates
   wss.clients.forEach((clientWs) => {
@@ -220,6 +213,12 @@ async function handleSendMessage(ws, msgData) {
     }
   });
 
+  // Update last message and its time for chat
+  chat.lastMessageTimestamp = currentTime;
+  chat.lastMessage = message;
+  chat.unreadCount[userId] = (chat.unreadCount[userId] || 0) + 1;
+  chat.markModified('unreadCount');
+  
   try {
     await newMessage.save();
     await chat.save();
