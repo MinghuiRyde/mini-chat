@@ -201,14 +201,15 @@ async function handleSendMessage(ws, msgData) {
   });
 
   newMessage.status = 'delivered';
-  const recipient = await User.findById(userId);
+  const sender = await User.findById(sender_id);
 
   const updateData = chat.lastMessage === '' ? {
     event: 'addChat',
     chat_id: chat._id,
+    sender_id: sender_id,
+    sender_nickname: sender.nickname,
+    sender_avatar_url: sender.avatarUrl,
     recipients_id: userId,
-    recipients_nickname: recipient.nickname,
-    recipients_avatar_url: recipient.avatarUrl,
     content: message,
     timestamp: currentTime,
   } : {
