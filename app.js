@@ -202,6 +202,7 @@ async function handleSendMessage(ws, msgData) {
 
   newMessage.status = 'delivered';
   const sender = await User.findById(sender_id);
+  const recipient = await User.findById(userId);
 
   const updateData = chat.lastMessage === '' ? {
     event: 'addChat',
@@ -210,6 +211,8 @@ async function handleSendMessage(ws, msgData) {
     sender_nickname: sender.nickname,
     sender_avatar_url: sender.avatarUrl,
     recipients_id: userId,
+    recipients_nickname: recipient.nickname,
+    recipients_avatar_url: recipient.avatarUrl,
     content: message,
     timestamp: currentTime,
   } : {
