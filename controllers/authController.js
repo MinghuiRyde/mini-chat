@@ -1,6 +1,4 @@
 const User = require('../models/User');
-const Chat = require('../models/Chat');
-const Message = require('../models/Message');
 const jwt = require('jsonwebtoken');
 const defaultUrl =
   'https://images.squarespace-cdn.com/content/v1/6670add926f2a64cd00fb0e7/d2f9b9c1-ab9c-4fe2-a793-d6a8634ac920/character+chii.png';
@@ -41,7 +39,6 @@ exports.login = async (req, res) => {
       const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.SESSION_EXPIRES,
       });
-      const currentTime = new Date();
 
       user = new User({
         _id: userId,
@@ -50,28 +47,7 @@ exports.login = async (req, res) => {
         avatarUrl: avatar_url === 'url' ? defaultUrl : avatar_url,
       });
 
-      const dummyChat = new Chat({
-        _id: `${userId}chat0`,
-        lastMessage: `Welcome ${nickname}!`,
-        lastMessageTimestamp: currentTime,
-        participants: [userId],
-        unreadCount: {
-          [userId]: 1,
-        }
-      })
-
-      const dummyMsg = new Message({
-        _id: `${userId}msg0`,
-        senderId: userId,
-        chatId: dummyChat._id,
-        message: `Welcome ${nickname}!`,
-        status: 'read',
-        timestamp: currentTime,
-      })
-
       await user.save();
-      await dummyChat.save();
-      await dummyMsg.save();
 
       res.status(200).json({
         session_token: user.sessionToken,
