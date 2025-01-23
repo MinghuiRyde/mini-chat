@@ -221,7 +221,7 @@ async function handleSendMessage(ws, msgData) {
 
   // Send update message in the common socket room for chat list updates
   wss.clients.forEach((clientWs) => {
-    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+    if (clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(updateData));
       console.log('sent update message: ', updateData);
     }
