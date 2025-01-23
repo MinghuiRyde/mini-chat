@@ -14,7 +14,9 @@ exports.getChatsByUser = async (req, res) => {
   try {
     const { user_id } = req.params;
     console.log(user_id);
-    const chats = await Chat.find({participants: user_id});
+    const chats = await Chat
+      .find({participants: user_id})
+      .sort({ timestamp: -1 });
     const user = await User.findById(user_id);
 
     if (!chats) {

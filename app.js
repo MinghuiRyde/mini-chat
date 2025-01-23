@@ -29,6 +29,8 @@ mongoose.connect(process.env.MONGODB_URI)
     // Create indexes for more efficient message history fetching
     await Message.createIndexes();
     console.log('Indexes created for Message model');
+    await Chat.createIndexes();
+    console.log('Indexes created for Chat model');
   })
   .catch(err => console.log(err));
 

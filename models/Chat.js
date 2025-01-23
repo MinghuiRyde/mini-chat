@@ -8,4 +8,6 @@ const ChatSchema = mongoose.Schema({
   unreadCount: Object,
 });
 
+ChatSchema.index({ lastMessageTimestamp: -1 });
+
 module.exports = mongoose.model('Chat', ChatSchema);
