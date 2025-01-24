@@ -133,6 +133,7 @@ function handleJoinRoom(ws, { chat_id }) {
   };
 
   // Send update read status data to over users in the room
+  console.log('Send update read status message');
   room.forEach(async (clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(sendData));
