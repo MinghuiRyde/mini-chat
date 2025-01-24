@@ -123,9 +123,20 @@ function handleJoinRoom(ws, { chat_id }) {
     chatRooms.set(chat_id, []);
   }
 
-  chatRooms.get(chat_id).push(ws);
+  const room = chatRooms.get(chat_id);
+  room.push(ws);
 
   ws.currentChatId = chat_id;
+
+  const sendData = {
+    event: 'updateReadMessages',
+  };
+
+  room.forEach(async (clientWs) => {
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(sendData));
+    }
+  });
 }
 
 /**
