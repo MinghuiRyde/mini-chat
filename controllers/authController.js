@@ -57,8 +57,18 @@ exports.login = async (req, res) => {
     } else {
       const decoded = jwt.decode(user.sessionToken);
       const expire_date = new Date(decoded.exp * 1000);
+      const now = Math.floor(Date.now() / 1000);
+      const remaining = decoded.exp - now;
+      if (remaining <= 0) {
+        return res.status(401).json({"Token expired at": expire_date});
+      }
+      const session_token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: remaining,
+      })
+      // Update to new Token
+      await User.updateOne({ _id: userId }, { sessionToken: session_token });
       res.status(200).json({
-        session_token: user.sessionToken,
+        session_token: session_token,
         expire_date: expire_date,
         user_id: user._id,
       });

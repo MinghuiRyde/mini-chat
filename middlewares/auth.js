@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const User = require('../models/User');
 
 /**
  * 
@@ -18,6 +20,13 @@ module.exports = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({ error: 'Invalid token' });
+    }
+    const userId = crypto.createHash('sha256')
+      .update(decoded.openId).digest('base64').slice(0,7);
+    const user = User.findById(userId);
+
+    if (!user || user.sessionToken !== token) {
+      return res.status(401).json({ error: 'Expired or Invalid token' });
     }
 
     req.user = decoded;
