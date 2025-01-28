@@ -1,6 +1,8 @@
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
 
+// Current delete logic, need to adjust to a more precise flow for smoother user experience
+
 exports.deleteChatOrMessage = async (req, res) => {
   try {
     const { type, id } = req.body;

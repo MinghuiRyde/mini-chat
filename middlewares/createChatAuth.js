@@ -13,9 +13,10 @@ module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401)
-      .json({ error: 'No or invalid authentication token provided' });
+      .json({ error: 'No token or Invalid token header provided' });
   }
 
+  // Remove bearer header
   const token = authHeader.replace('Bearer ', '');
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
