@@ -25,6 +25,7 @@ module.exports = (req, res, next) => {
       .update(decoded.openId).digest('base64').slice(0,7);
     const user = User.findById(userId);
 
+    // Check if the token is valid or expired
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     } else if (user.sessionToken !== token) {
