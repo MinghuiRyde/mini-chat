@@ -17,13 +17,12 @@ module.exports = (req, res, next) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     const { user_id } = req.params;
-    const user = User.findById(user_id);
-
+    const user = await User.findById(user_id);
     if (!user || user.sessionToken !== token) {
       return res.status(401).json({ error: 'Expired or Invalid token' });
     }

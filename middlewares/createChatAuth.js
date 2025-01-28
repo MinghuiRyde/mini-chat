@@ -17,16 +17,17 @@ module.exports = (req, res, next) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     const { user_a, user_b } = req.body;
-    const userA = User.findById(user_a);
-    const userB = User.findById(user_b);
+    const userA = await User.findById(user_a);
+    const userB = await User.findById(user_b);
 
 
     if (!userA || !userB || (userA.sessionToken !== token && userB.sessionToken !== token)) {
+      console.error('Expired or Invalid token');
       return res.status(401).json({ error: 'Expired or Invalid token' });
     }
 
