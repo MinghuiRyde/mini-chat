@@ -267,5 +267,6 @@ function sendError(ws, message) {
 }
 
 // Start server
+console.log(db.version());
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => console.log(`Listening on ${PORT}`));

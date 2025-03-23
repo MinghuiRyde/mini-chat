@@ -15,7 +15,7 @@ const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
  *
  */
 exports.login = async (req, res) => {
-  const { auth_code, nickname, avatar_url } = req.body;
+  const { auth_code, nickname, avatar_url, callerId } = req.body;
 
   if (!auth_code) {
     return res.status(400).json({ error: 'Missing jsCode in request body' });
@@ -28,10 +28,15 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const payload = await getSessionKeyAndOpenId(auth_code);
+    const { openId, sessionKey } = await getSessionKeyAndOpenId(auth_code);
     const userId = crypto.createHash('sha256').
       update(payload.openId).digest('base64').slice(0,7);
     let user = await User.findById(userId);
+    const payload = {
+      openId: openId,
+      sessionKey: sessionKey,
+      callerId: callerId,
+    }
 
     if (!user) {
       const expiresIn = 7 * 24 * 60 * 60 * 1000;
