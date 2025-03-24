@@ -11,6 +11,7 @@ const User = require('../models/User');
  */
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
+  console.log("authHeader", authHeader);
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401)
       .json({ error: 'No or invalid authentication token provided' });
