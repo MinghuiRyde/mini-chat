@@ -69,7 +69,7 @@ exports.getChatsByUser = async (req, res) => {
 exports.createChat = async (req, res) => {
   const { user_a, user_b } = req.body;
   if (user_a === user_b) {
-    return res.status(400).json({error: 'cannot create chat with the same user'});
+    return res.status(400).json({error: ' create chat with the same user'});
   }
   
   if (!user_a || !user_b) {

@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
   try {
     const { openId, sessionKey } = await getSessionKeyAndOpenId(auth_code);
     const userId = crypto.createHash('sha256').
-      update(payload.openId).digest('base64').slice(0,7);
+      update(openId).digest('base64').slice(0,7);
     let user = await User.findById(userId);
     const payload = {
       openId: openId,
