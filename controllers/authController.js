@@ -15,7 +15,8 @@ const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
  *
  */
 exports.login = async (req, res) => {
-  const { auth_code, nickname, avatar_url, caller_id } = req.body;
+  const { auth_code, nickname, avatar_url } = req.body;
+  let caller_id = req.body.caller_id;
 
   if (!caller_id) {
     caller_id = "unknown";
