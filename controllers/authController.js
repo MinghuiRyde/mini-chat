@@ -17,6 +17,10 @@ const { getSessionKeyAndOpenId } = require('../utils/wechatAuth');
 exports.login = async (req, res) => {
   const { auth_code, nickname, avatar_url, callerId } = req.body;
 
+  if (!callerId) {
+    callerId = "unknown";
+  }
+
   if (!auth_code) {
     return res.status(400).json({ error: 'Missing jsCode in request body' });
   }
