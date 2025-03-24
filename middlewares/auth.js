@@ -29,6 +29,8 @@ module.exports = (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     } else if (user.sessionToken !== token) {
+      console.log("user.sessionToken", user.sessionToken);
+      console.log("token", token);
       return res.status(401).json({ error: 'Expired token, please login again' });
     }
 
