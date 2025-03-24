@@ -9,7 +9,7 @@ const User = require('../models/User');
  * @param next Pass control to the next function.
  * 
  */
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   console.log("authHeader", authHeader);
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -18,15 +18,14 @@ module.exports = (req, res, next) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     const userId = crypto.createHash('sha256')
       .update(decoded.openId).digest('base64').slice(0,7);
     console.log("userId", userId);
-    const user = User.findOne({ _id: userId });
-
+    const user = await User.findById(userId);
 
     // Check if the token is valid or expired
     if (!user) {
