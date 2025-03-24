@@ -9,7 +9,7 @@ const User = require('../models/User');
  * @param next Pass control to the next function.
  * 
  */
-module.exports = async (req, res, next) => {
+module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
   console.log("authHeader", authHeader);
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

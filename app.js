@@ -73,6 +73,9 @@ wss.on('connection', (ws) => {
         case 'disconnect':
           removeSocketFromRooms(ws);
           break;
+        case 'init_call':
+          handleInitCall(ws, parsedData);
+          break;
         default:
           console.log('Received unknown event:', event);
       }
@@ -139,6 +142,48 @@ function handleJoinRoom(ws, { chat_id }) {
   room.forEach(async (clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify(sendData));
+    }
+  });
+}
+
+async function handleInitCall(ws, msgData) {
+  const { sender_id, chat_id } = msgData;
+  if (!chat_id || !sender_id) {
+    console.log('Chat ID or sender ID is missing');
+    return;
+  }
+
+  console.log('init_call', chat_id);
+
+  const room = chatRooms.get(chat_id);
+  if (!room || room.length < 2) {
+    console.log('Not enough participants in the chat');
+    return;
+  }
+
+  let chat = await Chat.findById(chat_id);
+  if (!chat) {
+    console.error('No such chat:', chat_id);
+    sendError(ws, 'Chat does not exist');
+    return;
+  }
+
+  // Find the recipient's ID
+  let userId = chat.participants.find(participant => participant !== sender_id);
+  userId = userId ? userId : sender_id;
+
+  const user = await User.findById(userId);
+  const callerId = user.callerId || 'unknown';
+  const URL = `https://trtcwebview-develop.rydesharing.com/?callerId=${callerId}&call_status=0`;
+
+  room.forEach((clientWs) => {
+
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send({
+        event: 'init_call',
+        url: URL,
+      });
+      console.log('Init call', URL);
     }
   });
 }
