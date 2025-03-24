@@ -40,7 +40,6 @@ exports.login = async (req, res) => {
     const payload = {
       openId: openId,
       sessionKey: sessionKey,
-      callerId: caller_id,
     }
 
     if (!user) {
@@ -55,6 +54,7 @@ exports.login = async (req, res) => {
         sessionToken: session_token,
         nickname: nickname,
         avatarUrl: avatar_url === 'url' ? defaultUrl : avatar_url,
+        caller_id: caller_id,
       });
 
       await user.save();

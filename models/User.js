@@ -7,6 +7,7 @@ const UserSchema = mongoose.Schema({
   sessionToken: String,
   nickname: String,
   avatarUrl: String,
+  callerId: String,
 });
 
 module.exports = mongoose.model('User', UserSchema);
