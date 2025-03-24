@@ -180,15 +180,14 @@ async function handleInitCall(ws, msgData) {
   const URL = `https://trtcwebview-develop.rydesharing.com/?callerId=${callerId}&call_status=0`;
 
   room.forEach((clientWs) => {
-
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send({
         event: 'init_call',
         url: URL,
       });
-      console.log('Init call', URL);
     }
   });
+  console.log('Init call', URL);
 }
 
 async function handleCallStatusUpdate(ws, msgData) {
@@ -210,7 +209,6 @@ async function handleCallStatusUpdate(ws, msgData) {
       console.log('Init call', URL);
     }
   });
-
 }
 
 /**
