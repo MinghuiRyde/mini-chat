@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
         sessionToken: session_token,
         nickname: nickname,
         avatarUrl: avatar_url === 'url' ? defaultUrl : avatar_url,
-        caller_id: caller_id,
+        callerId: caller_id,
       });
 
       await user.save();
