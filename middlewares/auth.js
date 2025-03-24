@@ -25,8 +25,8 @@ module.exports = (req, res, next) => {
     const userId = crypto.createHash('sha256')
       .update(decoded.openId).digest('base64').slice(0,7);
     console.log("userId", userId);
-    const user = User.findById(userId);
-    console.log("user", user);
+    const user = User.findOne({ _id: userId });
+
 
     // Check if the token is valid or expired
     if (!user) {
