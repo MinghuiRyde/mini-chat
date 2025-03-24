@@ -76,6 +76,9 @@ wss.on('connection', (ws) => {
         case 'init_call':
           handleInitCall(ws, parsedData);
           break;
+        case 'call_status_update':
+          handleCallStatusUpdate(ws, parsedData);
+          break;
         default:
           console.log('Received unknown event:', event);
       }
@@ -186,6 +189,28 @@ async function handleInitCall(ws, msgData) {
       console.log('Init call', URL);
     }
   });
+}
+
+async function handleCallStatusUpdate(ws, msgData) {
+  const { message, chat_id } = msgData;
+
+  console.log('call_status_update', chat_id);
+
+  const room = chatRooms.get(chat_id);
+  if (!room || room.length < 2) {
+    console.log('Not enough participants in the chat');
+    return;
+  }
+  room.forEach((clientWs) => {
+    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send({
+        event: 'call_status_update',
+        message: message,
+      });
+      console.log('Init call', URL);
+    }
+  });
+
 }
 
 /**
