@@ -181,10 +181,11 @@ async function handleInitCall(ws, msgData) {
 
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send({
+      clientWs.send(JSON.stringify({
         event: 'init_call',
         url: URL,
-      });
+      }));
+      console.log('callee id', callerId);
     }
   });
   console.log('Init call', URL);
@@ -202,11 +203,11 @@ async function handleCallStatusUpdate(ws, msgData) {
   }
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send({
+      clientWs.send(JSON.stringify({
         event: 'call_status_update',
         message: message,
-      });
-      console.log('Init call', URL);
+      }));
+      console.log('call_status_update', message);
     }
   });
 }
