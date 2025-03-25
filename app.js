@@ -93,6 +93,10 @@ wss.on('connection', (ws) => {
     console.log('Disconnected');
     removeSocketFromRooms(ws);
   });
+
+  ws.on('error', (error) => {
+    console.log('WebSocket Error:', error);
+  });
 });
 
 /**
