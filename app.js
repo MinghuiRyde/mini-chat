@@ -177,7 +177,7 @@ async function handleInitCall(ws, msgData) {
 
   const user = await User.findById(userId);
   const callerId = user.callerId || 'unknown';
-  const URL = `https://trtcwebview-develop.rydesharing.com/?callerId=${callerId}&call_status=0`;
+  const URL = `https://trtcwebview-develop.rydesharing.com/?caller=${callerId}&call_status=0`;
 
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
