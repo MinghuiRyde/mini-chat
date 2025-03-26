@@ -47,6 +47,8 @@ app.use('/api/callerror', callErrorRoutes);
 
 const chatRooms = new Map();
 
+app.locals.chatRooms = chatRooms;
+
 // WebSocket connection for chatting
 wss.on('connection', (ws) => {
   console.log('New connection established');
