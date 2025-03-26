@@ -30,7 +30,6 @@ router.post('/', async (req, res) => {
 
         const chatId = chat ? chat._id : null;
         console.log('chatId:', chatId);
-        console.log('chatRooms:', chatRooms);
         const room = chatRooms.get(chatId);
 
         room.forEach(socket => {
