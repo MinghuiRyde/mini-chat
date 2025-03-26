@@ -8,6 +8,7 @@ const chatsRoutes = require('./routes/chats');
 const recipientsRoutes = require('./routes/recipients');
 const deleteRoutes = require('./routes/delete');
 const callRoutes = require('./routes/call');
+const callErrorRoutes = require('./routes/callerror');
 
 const http = require('http');
 const { WebSocket } = require('ws');
@@ -42,6 +43,7 @@ app.use('/api/chats', chatsRoutes);
 app.use('/api/recipients', recipientsRoutes);
 app.use('/api/delete', deleteRoutes);
 app.use('/api/call', callRoutes);
+app.use('/api/callerror', callErrorRoutes);
 
 const chatRooms = new Map();
 
