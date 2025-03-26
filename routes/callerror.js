@@ -31,6 +31,7 @@ router.post('/', async (req, res) => {
         const chatId = chat ? chat._id : null;
         console.log('chatId:', chatId);
         const room = chatRooms.get(chatId);
+        console.log('room size:', room ? room.length : 0);
 
         room.forEach(socket => {
             socket.send(JSON.stringify({ type: 'call_status_update', message: "init_failed" }));
