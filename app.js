@@ -224,8 +224,10 @@ async function handleInitCall(ws, msgData) {
   userId = userId ? userId : sender_id;
 
   const user = await User.findById(userId);
+  const sender = await User.findById(sender_id);
+  const calleeId = sender.callerId || 'unknown';
   const callerId = user.callerId || 'unknown';
-  const URL = `https://trtcwebview-develop.rydesharing.com/?caller=${callerId}&call_status=0`;
+  const URL = `https://trtcwebview-develop.rydesharing.com/?caller=${callerId}&callee=${calleeId}&call_status=0`;
 
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
