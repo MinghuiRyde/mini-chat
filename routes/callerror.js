@@ -34,7 +34,7 @@ router.post('/', async (req, res) => {
         console.log('room size:', room ? room.length : 0);
 
         room.forEach(socket => {
-            socket.send(JSON.stringify({ type: 'call_status_update', message: "init_failed" }));
+            socket.send(JSON.stringify({ event: 'call_status_update', message: "init_failed" }));
         });
 
         console.log("error sent");

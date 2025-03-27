@@ -83,6 +83,9 @@ wss.on('connection', (ws) => {
         case 'call_status_update':
           handleCallStatusUpdate(ws, parsedData);
           break;
+        case 'call_error':
+          handleCallError(ws, parsedData);
+          break
         default:
           console.log('Received unknown event:', event);
       }
@@ -155,6 +158,43 @@ function handleJoinRoom(ws, { chat_id }) {
       clientWs.send(JSON.stringify(sendData));
     }
   });
+}
+
+async function handleCallError(ws, msgData) {
+  const { errorData } = msgData;
+  console.log('call_error', errorData.error);
+
+  const { caller, callee } = errorData;
+  console.log('caller:', caller);
+  console.log('callee:', callee);
+
+  const callerId = await User.findOne(
+      { callerId: caller },
+      { _id: 1 }
+  );
+
+  const calleeId = await User.findOne(
+      { callerId: callee },
+      { _id: 1 }
+  );
+  console.log('callerId:', callerId);
+  console.log('calleeId:', calleeId);
+
+  const chat = await Chat.findOne(
+      { participants: { $all: [callerId, calleeId] } },
+      { _id: 1}
+  );
+
+  const chatId = chat ? chat._id : null;
+  console.log('chatId:', chatId);
+  const room = chatRooms.get(chatId);
+  console.log('room size:', room ? room.length : 0);
+
+  room.forEach(socket => {
+      socket.send(JSON.stringify({ event: 'call_status_update', message: "init_failed" }));
+  });
+
+  console.log("error sent");
 }
 
 async function handleInitCall(ws, msgData) {
