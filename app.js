@@ -220,10 +220,6 @@ async function handleCallStatusUpdate(ws, msgData) {
   console.log('call_status_update', chat_id);
 
   const room = chatRooms.get(chat_id);
-  if (!room || room.length < 2) {
-    console.log('Not enough participants in the chat');
-    return;
-  }
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify({
