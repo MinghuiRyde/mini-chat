@@ -41,9 +41,9 @@ exports.createCall = async (req, res) => {
         console.log('Redirecting to:', urlToGo);
         res.status(200).json({ url: urlToGo });
         sendSubscriptionMessage({
-            thing01: {
-                value: 'incoming_call',
-            }
+            thing2: { value: 'incomingCall' },
+            thing5: { value: 'blahblahblah' },
+            car_number4: { value: 'ryde123' },
         }, calleePayload.openId);
         console.log('Subscription message sent to callee:', calleePayload.openId);
     } catch (error) {
