@@ -220,15 +220,26 @@ async function handleCallStatusUpdate(ws, msgData) {
   console.log('call_status_update', chat_id);
 
   const room = chatRooms.get(chat_id);
-  room.forEach((clientWs) => {
-    if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send(JSON.stringify({
-        event: 'call_status_update',
-        message: message,
-      }));
-      console.log('call_status_update', message);
-    }
-  });
+  if (room.length === 1) {
+    room[0].send(JSON.stringify({
+      event: 'call_status_update',
+      message: message,
+    }));
+    console.log('call_status_update', message);
+  } else if (room.length >= 2) {
+    room.forEach((clientWs) => {
+      if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+        clientWs.send(JSON.stringify({
+          event: 'call_status_update',
+          message: message,
+        }));
+        console.log('call_status_update', message);
+      }
+    });
+  } else {
+    console.log('No participants in the chat');
+    return;
+  }
 }
 
 /**
