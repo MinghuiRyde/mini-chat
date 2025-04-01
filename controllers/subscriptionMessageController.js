@@ -27,7 +27,7 @@ async function sendSubscriptionMessage(data, openId) {
             {
                 touser: openId,
                 template_id: "FifXBWUvxSllt_W_eh-STye2chZ-oyEiT8Kn8vGBMIc",
-                //page:'/pages/index',
+                page:'/pages/home',
                 data,
                 miniprogram_state: 'developer',
                 lang: 'en_US'
@@ -41,7 +41,7 @@ async function sendSubscriptionMessage(data, openId) {
         console.log("response body ", JSON.stringify({
             touser: openId,
             template_id: "FifXBWUvxSllt_W_eh-STye2chZ-oyEiT8Kn8vGBMIc",
-            //page:'/pages/index',
+            page:'/pages/home',
             data,
             miniprogram_state: 'developer',
             lang: 'en_US'
