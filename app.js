@@ -218,7 +218,11 @@ async function handleCallStatusUpdate(ws, msgData) {
   const { message, chat_id } = msgData;
 
   console.log('call_status_update', chat_id);
-
+  if (!chat_id || !message) {
+    console.log('Chat ID or message is missing');
+    return;
+  }
+  
   const room = chatRooms.get(chat_id);
   if (!room) {
     console.log('No such chat room:', chat_id);
