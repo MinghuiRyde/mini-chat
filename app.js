@@ -210,7 +210,7 @@ async function handleInitCall(ws, msgData) {
       }));
     }
   });
-  console.log('calleeId', receiver_id);
+  console.log('calleeId', userId);
   console.log('Init call', URL);
 }
 
