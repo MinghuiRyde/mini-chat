@@ -3,6 +3,7 @@ const URL = "https://trtcwebview-develop.rydesharing.com";
 const crypto = require('crypto');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
+const { sendSubscriptionMessage } = require('./subscriptionMessageController');
 
 exports.createCall = async (req, res) => {
     try {
@@ -33,10 +34,18 @@ exports.createCall = async (req, res) => {
         }
 
         const calleeId = callee.callerId || 'unknown';
+        const calleeToken = callee.sessionToken;
+        const calleePayload = jwt.verify(calleeToken, process.env.JWT_SECRET);
 
         const urlToGo = `${URL}/?caller=${callerId}&callee=${calleeId}&call_status=1`;
         console.log('Redirecting to:', urlToGo);
         res.status(200).json({ url: urlToGo });
+        sendSubscriptionMessage({
+            thing01: {
+                value: 'incoming_call',
+            }
+        }, calleePayload.openId);
+        console.log('Subscription message sent to callee:', calleePayload.openId);
     } catch (error) {
         console.error('Error in call:', error);
         res.status(500).json({ message: 'Internal server error' });
