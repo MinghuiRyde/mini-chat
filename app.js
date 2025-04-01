@@ -83,12 +83,6 @@ wss.on('connection', (ws) => {
         case 'call_status_update':
           handleCallStatusUpdate(ws, parsedData);
           break;
-        case 'call_error':
-          handleCallError(ws, parsedData);
-          break
-        case 'call':
-          handleTRTC(ws, parsedData);
-          break;
         default:
           console.log('Received unknown event:', event);
       }
@@ -163,73 +157,6 @@ function handleJoinRoom(ws, { chat_id }) {
   });
 }
 
-async function handleTRTC(ws, msgData) {
-  const { data } = msgData;
-  console.log('call', data);
-
-  const { caller, callee } = data;
-  console.log('caller:', caller);
-  console.log('callee:', callee);
-
-  const callerId = await User.findOne(
-      { callerId: caller },
-      { _id: 1 }
-  );
-
-  const calleeId = await User.findOne(
-      { callerId: callee },
-      { _id: 1 }
-  );
-
-  const chat = await Chat.findOne(
-      { participants: { $all: [callerId, calleeId] } },
-      { _id: 1}
-  );
-
-  const chatId = chat ? chat._id : null;
-  console.log('chatId:', chatId);
-  const room = chatRooms.get(chatId);
-
-  room.push(ws);
-}
-
-async function handleCallError(ws, msgData) {
-  const { errorData } = msgData;
-  console.log('call_error', errorData.error);
-
-  const { caller, callee } = errorData;
-  console.log('caller:', caller);
-  console.log('callee:', callee);
-
-  const callerId = await User.findOne(
-      { callerId: caller },
-      { _id: 1 }
-  );
-
-  const calleeId = await User.findOne(
-      { callerId: callee },
-      { _id: 1 }
-  );
-  console.log('callerId:', callerId);
-  console.log('calleeId:', calleeId);
-
-  const chat = await Chat.findOne(
-      { participants: { $all: [callerId, calleeId] } },
-      { _id: 1}
-  );
-
-  const chatId = chat ? chat._id : null;
-  console.log('chatId:', chatId);
-  const room = chatRooms.get(chatId);
-  console.log('room size:', room ? room.length : 0);
-
-  room.forEach(socket => {
-      socket.send(JSON.stringify({ event: 'call_status_update', message: "init_failed" }));
-  });
-
-  console.log("error sent");
-}
-
 async function handleInitCall(ws, msgData) {
   const { sender_id, chat_id } = msgData;
   if (!chat_id || !sender_id) {
@@ -239,11 +166,11 @@ async function handleInitCall(ws, msgData) {
 
   console.log('init_call', chat_id);
 
-  const room = chatRooms.get(chat_id);
-  if (!room || room.length < 2) {
-    console.log('Not enough participants in the chat');
-    return;
-  }
+  // const room = chatRooms.get(chat_id);
+  // if (!room || room.length < 2) {
+  //   console.log('Not enough participants in the chat');
+  //   return;
+  // }
 
   let chat = await Chat.findById(chat_id);
   if (!chat) {
@@ -262,7 +189,18 @@ async function handleInitCall(ws, msgData) {
   const callerId = user.callerId || 'unknown';
   const URL = `https://trtcwebview-develop.rydesharing.com/?caller=${callerId}&callee=${calleeId}&call_status=0`;
 
-  room.forEach((clientWs) => {
+  // room.forEach((clientWs) => {
+  //   if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
+  //     clientWs.send(JSON.stringify({
+  //       event: 'init_call',
+  //       url: URL,
+  //       chat_id: chat_id,
+  //       receiver_id: userId,
+  //     }));
+  //     console.log('callee id', callerId);
+  //   }
+  // });
+  wss.clients.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify({
         event: 'init_call',
@@ -270,9 +208,9 @@ async function handleInitCall(ws, msgData) {
         chat_id: chat_id,
         receiver_id: userId,
       }));
-      console.log('callee id', callerId);
     }
   });
+  console.log('call_status_update', message);
   console.log('Init call', URL);
 }
 
@@ -286,7 +224,6 @@ async function handleCallStatusUpdate(ws, msgData) {
     console.log('Not enough participants in the chat');
     return;
   }
-
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify({
