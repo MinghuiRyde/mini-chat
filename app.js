@@ -220,6 +220,11 @@ async function handleCallStatusUpdate(ws, msgData) {
   console.log('call_status_update', chat_id);
 
   const room = chatRooms.get(chat_id);
+  if (!room) {
+    console.log('No such chat room:', chat_id);
+    return;
+  }
+
   if (room.length === 1) {
     room[0].send(JSON.stringify({
       event: 'call_status_update',
