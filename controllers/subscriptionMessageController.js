@@ -41,10 +41,10 @@ async function sendSubscriptionMessage(data, openId) {
         console.log("response body ", JSON.stringify({
             touser: openId,
             template_id: "FifXBWUvxSllt_W_eh-STye2chZ-oyEiT8Kn8vGBMIc",
-            page:'/pages/index',
+            //page:'/pages/index',
             data,
-            miniprogram_state: 'formal',
-            lang: 'zh_CN'
+            miniprogram_state: 'developer',
+            lang: 'en_US'
         }));
         console.log("response from subscription server", JSON.stringify(response.data));
         if (response.data.errcode === 0) {
