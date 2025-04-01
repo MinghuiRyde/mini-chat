@@ -86,6 +86,9 @@ wss.on('connection', (ws) => {
         case 'call_error':
           handleCallError(ws, parsedData);
           break
+        case 'call':
+          handleTRTC(ws, parsedData);
+          break;
         default:
           console.log('Received unknown event:', event);
       }
@@ -158,6 +161,36 @@ function handleJoinRoom(ws, { chat_id }) {
       clientWs.send(JSON.stringify(sendData));
     }
   });
+}
+
+async function handleTRTC(ws, msgData) {
+  const { data } = msgData;
+  console.log('call', data);
+
+  const { caller, callee } = data;
+  console.log('caller:', caller);
+  console.log('callee:', callee);
+
+  const callerId = await User.findOne(
+      { callerId: caller },
+      { _id: 1 }
+  );
+
+  const calleeId = await User.findOne(
+      { callerId: callee },
+      { _id: 1 }
+  );
+
+  const chat = await Chat.findOne(
+      { participants: { $all: [callerId, calleeId] } },
+      { _id: 1}
+  );
+
+  const chatId = chat ? chat._id : null;
+  console.log('chatId:', chatId);
+  const room = chatRooms.get(chatId);
+
+  room.push(ws);
 }
 
 async function handleCallError(ws, msgData) {
@@ -234,6 +267,8 @@ async function handleInitCall(ws, msgData) {
       clientWs.send(JSON.stringify({
         event: 'init_call',
         url: URL,
+        chat_id: chat_id,
+        receiver_id: userId,
       }));
       console.log('callee id', callerId);
     }
@@ -251,6 +286,7 @@ async function handleCallStatusUpdate(ws, msgData) {
     console.log('Not enough participants in the chat');
     return;
   }
+
   room.forEach((clientWs) => {
     if (clientWs !== ws && clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(JSON.stringify({
